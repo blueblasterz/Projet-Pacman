@@ -12,6 +12,6 @@ public:
         Terrain* terrain );
     ~View();
 protected:
-    // pointeurs vers les modèles (player, ghost, labyrinthe..)
+    // pointeurs vers les modèles (Pacman, ghost, labyrinthe..)
     // les pointeurs vers les entitées peuvent etre des entitées
 };

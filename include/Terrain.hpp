@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 
-#include "Player.hpp"
+#include "Pacman.hpp"
 
 // on aurait pu en faire une class, mais ça parraissait un peu inutile
 namespace Tile {
@@ -24,7 +24,7 @@ public:
     void print_terrain();
 
 protected:
-    Player * m_player;
+    Pacman * m_pacman;
 
     std::array<std::array<Tile::Tile,36>,28> m_tiles;
     

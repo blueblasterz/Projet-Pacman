@@ -1,9 +1,9 @@
-#include "Player.hpp"
+#include "Pacman.hpp"
 // les ghotsts
 
 class Logic {
 
 
 protected:
-    // pointeurs vers les modèles (player, ghost..)
+    // pointeurs vers les modèles (Pacman, ghost..)
 };

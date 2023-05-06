@@ -2,11 +2,11 @@
 
 #include "Entity.hpp"
 
-class Player : public Entity{
+class Pacman : public Entity{
 public:
-    Player();
-    Player(double x, double y);
-    ~Player();
+    Pacman();
+    Pacman(double x, double y);
+    ~Pacman();
 
     bool is_energized();
 
