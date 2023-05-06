@@ -1,5 +1,4 @@
-#ifndef VIEW_HPP
-#define VIEW_HPP
+#pragma once
 
 #include "Entity.hpp"
 #include "Terrain.hpp"
@@ -18,5 +17,3 @@ protected:
     // pointeurs vers les modèles (Pacman, ghost, labyrinthe..)
     // les pointeurs vers les entitées peuvent etre des entitées
 };
-
-#endif
