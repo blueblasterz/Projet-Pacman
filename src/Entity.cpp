@@ -5,10 +5,13 @@
 
 using std::array, std::cout, std::cin, std::endl;
 
+
 Entity::Entity() : Entity(0.0,0.0) {}
 
+
 Entity::Entity(double x, double y) 
-: m_x(x), m_y(y) {
+: m_x(x),
+  m_y(y) {
     m_tile_x = round(m_x);
     m_tile_y = round(m_y);
 }
@@ -23,17 +26,94 @@ double Entity::get_y() {
     return m_y;
 }
 
+std::pair<double,double> Entity::get_pos() {
+    return {m_x,m_y};
+}
+
 void Entity::set_x(double x) {
     m_x = x;
+    m_tile_x = int(x)/8;
 }
 void Entity::set_y(double y) {
     m_y = y;
+    m_tile_y = floor(y)/8;
 }
+void Entity::set_pos(double x, double y) {
+    this->set_x(x);
+    this->set_y(y);
+}
+void Entity::set_pos(std::pair<double,double> pos) {
+    this->set_x(pos.first);
+    this->set_y(pos.second);
+}
+
 void Entity::move(double dx, double dy) {
     this->set_x(this->get_x() + dx);
     this->set_y(this->get_y() + dy);
 }
 
-array<int,2> Entity::get_tile() {
-    return {m_tile_x, m_tile_y};
+std::pair<int,int> Entity::get_tile(int ahead) {
+    if(ahead == 0)
+        return {m_tile_x, m_tile_y};
+    switch(m_direction) {
+        case Direction::Up :
+            return {m_tile_x-ahead, m_tile_y-ahead};
+        case Direction::Down :
+            return {m_tile_x+ahead, m_tile_y};
+        case Direction::Left :
+            return {m_tile_x, m_tile_y-ahead};
+        case Direction::Right:
+            return {m_tile_x, m_tile_y+ahead};
+        default:
+            return {m_tile_x, m_tile_y};
+            break;
+    }
+}
+
+void Entity::set_tile(int x, int y) {
+    m_tile_x = x;
+    m_tile_y = y;
+    m_x = x*8 + 4;
+    m_y = y*8 + 4;
+}
+void Entity::set_tile(std::pair<int,int> pos) {
+    this->set_tile(pos.first, pos.second);
+}
+
+Direction::Direction Entity::get_direction() {
+    return m_direction;
+}
+
+void Entity::set_direction(Direction::Direction dir) {
+    m_direction = dir;
+}
+
+double Entity::dist(double x, double y) const {
+    cout << m_x << " " << m_y << endl;
+    cout << x << " " << y << endl;
+    return sqrt( pow(floor(m_x/8)*8-floor(x/8)*8,2) 
+               + pow(floor(m_y/8)*8-floor(y/8)*8,2) );
+}
+double Entity::dist(std::pair<double,double> pos) const {
+    return this->dist(pos.first, pos.second);
+}
+
+double Entity::dist(std::shared_ptr<Entity> e) const {
+    return this->dist(e->get_pos());
+}
+
+double Entity::get_speed() {
+    return m_speed*default_speed;
+}
+
+void Entity::set_speed(double speed) {
+    if (speed < 0) {
+        m_speed = 0;
+    }
+    else if (speed > 1) {
+        m_speed = 1;
+    }
+    else {
+        m_speed = speed;
+    }
 }

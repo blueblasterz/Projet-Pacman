@@ -6,7 +6,9 @@ class Pacman : public Entity{
 public:
     Pacman();
     Pacman(double x, double y);
-    ~Pacman();
+    // ~Pacman();
+
+    void print_position();
 
     bool is_energized();
 
