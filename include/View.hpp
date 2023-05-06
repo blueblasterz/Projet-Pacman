@@ -18,10 +18,31 @@ public:
         // Entity* clyde
         );
     ~View();
-    // void draw(void);
+
+    /*
+    Permet de dessiner la fenêtre avec les sprites aux bonnes positions
+    La fonction prend ainsi les coordonnées de chaque entités et les dessine à la bonne position
+    */
+    void draw(Entity *pacman, Entity *blinky, Entity *pinky, Entity *inky, Entity *clyde);
+    
     SDL_Window *getWindow(void);
-    void draw_beginning(void);
+
+    /* 
+    Fonction prototype de draw() avec les positions de base du début de partie
+    */
+    void draw_beginning();
+
+    /*
+    Fonction permettant de redimensionner les sprites pour les afficher en 3x plus grand.
+    La fenêtre de jeu étant 3x plus grande que les dimensions du sprite sur le fichier BMP,
+    la fonction permet de faire le lien entre les coordonnées du modèle et les coordonnées de la fenêtre.
+    */
     SDL_Rect entity_scaled(SDL_Rect entity);
+
+    /*
+    Fonction permettant de remplacer la tuile de la case où se trouve le pacman par une tuile de la
+    map où il n'y a rien (case vide)
+    */
 protected:
     // pointeurs vers les modèles (Pacman, ghost..)
     // On a pas de pointeurs pour le terrain car il n'est pas censé bouger
@@ -40,7 +61,7 @@ protected:
     SDL_Rect src_bg;
     SDL_Rect bg;
 
-    // pointeurs vers les fenetres et rendu
+    // pointeurs vers les fenêtres et rendu
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     SDL_Surface* win_surf;
