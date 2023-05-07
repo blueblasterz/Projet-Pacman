@@ -30,7 +30,13 @@ Game::Game() {
         m_inky,
         m_terrain
     );
-    m_view = std::make_shared<View>();
+    m_view = std::make_shared<View>(
+        m_pacman.get(),
+        m_blinky.get(),
+        m_pinky.get(),
+        m_inky.get(),
+        m_clyde.get()
+    );
     cout << "Fin de l'initialisation" << endl;
 }
 
@@ -127,11 +133,12 @@ void Game::launch() {
 
         // AFFICHAGE
         m_view->draw(
-            m_pacman.get(),
-            m_blinky.get(),
-            m_pinky.get(),
-            m_inky.get(),
-            m_clyde.get());
+            // m_pacman.get(),
+            // m_blinky.get(),
+            // m_pinky.get(),
+            // m_inky.get(),
+            // m_clyde.get()
+            );
         SDL_UpdateWindowSurface(m_view->getWindow());
         // LIMITE A 60 FPS
         SDL_Delay(16); // utiliser SDL_GetTicks64() pour plus de precisions
