@@ -39,7 +39,7 @@ namespace Setting {
         0.4,
         {7,34,59,84},
         {27,54,79},
-        3
+        6
     };
     const level level2_4 {
         0.9,

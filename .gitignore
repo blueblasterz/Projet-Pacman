@@ -1,6 +1,5 @@
 bin
 obj
 .vscode
-src/main.cpp
-src/Terrain.cpp
-include/Terrain.hpp
+brouillon
+truc.py

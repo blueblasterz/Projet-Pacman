@@ -119,6 +119,7 @@ void Ghost::set_logic_state(Ghost::LogicState state) {
     // l'état précédent à FRIGHT
     if(state == LogicState::L_RECOVER) {
         state = m_stored_logic_state;
+        // std::cout << "recovered state " << state << m_stored_logic_state << std::endl;
     }
     // on enregistre l'état actuel dans le cas de FRIGHT
     if(state == LogicState::L_FRIGHT && m_logic_state != LogicState::L_FRIGHT) {

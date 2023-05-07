@@ -1,4 +1,4 @@
-BINDIR=./bin
+BINDIR=.
 SRCDIR=./src
 OBJDIR=./obj
 INCDIR=./include
@@ -36,4 +36,4 @@ exec: $(BINDIR)/$(EXEC)
 
 .PHONY: clean
 clean:
-	rm -rf $(BINDIR)/* $(OBJDIR)/*
+	rm -rf $(BINDIR)/${EXEC} $(OBJDIR)/*

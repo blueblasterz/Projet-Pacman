@@ -98,11 +98,12 @@ void Game::launch() {
                         break;
                     case SDLK_p:
                         pause = !pause;
+                        m_logic->set_paused(pause);
                         // m_view->toggle_pause()
                         break;
                     case SDLK_d:
                         cout << "Pacman : " << m_pacman->get_tile() << m_pacman->get_pos() << endl;
-                        cout << "Blinky : " << m_blinky->get_tile() << endl;
+                        cout << "Plinky : " << m_pinky->get_tile() << endl;
                         break;
                     case SDLK_s:
                         if(m_pacman->get_speed() != 0)
@@ -185,11 +186,11 @@ void Game::launch() {
                 // cout << "  l_state : " << m_pinky->get_logic_state() << endl;
                 // cout << "  state   : " << m_pinky->get_state() << endl;
                 // cout << endl;
-                // cout << "energy_Pacman : " << m_pacman->is_energized() << endl << endl;
             }
             // cout << m_pacman->get_pos() << endl;
             // cout << m_pinky->get_target() << endl;
         }
+        quit = quit || m_logic->is_finished();
         
 
         // AFFICHAGE

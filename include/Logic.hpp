@@ -60,6 +60,14 @@ public:
 
     int get_life();
 
+
+    void set_paused(bool b);
+    bool is_paused();
+
+    bool show_ready();
+
+    bool is_finished();
+
 protected:
     // pointeurs vers les modèles (Pacman, ghost..)
     std::shared_ptr<Pacman> m_pacman;
@@ -98,4 +106,10 @@ protected:
 
     // nb de frame depuis le dernier mangeage de dot
     int m_frame_last_eaten;
+
+    // est-ce que le jeu est en pause ?
+    bool m_paused;
+
+    // est-ce que le jeu est fini ?
+    bool m_finished;
 };

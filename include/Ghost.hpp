@@ -81,6 +81,7 @@ public:
     void update_dir_retour();
     std::pair<double,double> get_dir_retour();
 
+
 protected:
     // contient la case visée par le fantome actuellement
     std::pair<int,int> m_target;
@@ -135,6 +136,7 @@ protected:
 
     // utilisé pour faire rentrer le fantome au centre, après qu'il ait été mangé
     std::pair<double,double> m_dir_retour;
+
 
 };
 
