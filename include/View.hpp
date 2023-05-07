@@ -86,7 +86,7 @@ public:
     /*
     Permet d'afficher un message de victoire lorsque le joueur a mangé tous les points
     */
-    void draw_win();
+    // void draw_win();
 
     /*
     Permet d'afficher un message de pause lorsque le joueur appuie sur la touche "p"

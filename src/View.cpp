@@ -356,6 +356,20 @@ void View::draw_start(){
 //     position_message.x += 24;
 
 // }
+void View::draw_game_over(){
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_P, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_E, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_R, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_D, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_excl, win_surf, &position_message);
+    position_message.x = get_rect_x(bg_message);
+}
 
 void View::draw(){
     // Ghost::State state = m_blinky->get_state();
@@ -371,9 +385,9 @@ void View::draw(){
     
     SDL_SetColorKey(plancheSprites, true, 0);
 
-    // if (m_logic->get_life() == 0){
-    //     // draw_game_over();
-    // }
+    if (m_logic->get_life() == -1){
+        draw_game_over();
+    }
     if (m_logic->is_paused()){
         draw_pause();
     }
