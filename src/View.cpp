@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Entity.hpp"
 #include <vector>
+#include <string.h>
 
 #define SCREEN_WIDTH   672
 #define SCREEN_HEIGHT  864
@@ -61,15 +62,12 @@ View::View(
         std::cerr << "Impossible de charger le fichier de sprites : " << SDL_GetError() << std::endl;
         exit(1);
     }
-    // SDL_Surface* background = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 250, 250, 0);
-    
+
     // On initialise maintenant tout ce qui est relatif à la map
 
     // Dimensions de la map et coordonnées de celle-ci dans la planche de sprites
     src_bg = { 1, 1, 224,248 }; // x,y, w,h (0,0) en haut a gauche
     bg = { 0,72, 672, 744 }; // ici scale x3 pour afficher le jeu
-    black_bg = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-
     // Maintenant on est censé pouvoir afficher la map de taille 227x250 sur une fenêtre de taille 908x1000
 
     // On initialise les coordonnées des sprites
@@ -80,14 +78,6 @@ View::View(
     m_clyde_sprite = {685, 113, 16, 16};
     bg_pointless = {474, 327, 16, 16}; // Petite case noire de 16x16 pixels
 
-    // points = {
-    //     {1, 4},
-    //     {2, 4},
-    //     {3, 4},
-    //     {4, 4},
-    //     {16, 17}
-    // };
-
     // Affichage score (partie immobile donc initialisée ici):
 
     SDL_Rect S_sprite = {254,264, 7, 7};
@@ -96,6 +86,8 @@ View::View(
     SDL_Rect R_sprite = {246,264, 7, 7};
     SDL_Rect E_sprite = {263,256, 7, 7}; 
     SDL_Rect tiret = {320,275, 7, 7};
+    SDL_Rect sprite_0 = {230, 272, 7, 7};
+    
     SDL_Rect score_scaled = {96*2, 4*2, 7*2, 7*2};
     SDL_BlitScaled(plancheSprites, &S_sprite, win_surf, &score_scaled);
     score_scaled.x += 8*2;
@@ -106,9 +98,26 @@ View::View(
     SDL_BlitScaled(plancheSprites, &R_sprite, win_surf, &score_scaled);
     score_scaled.x += 8*2;
     SDL_BlitScaled(plancheSprites, &E_sprite, win_surf, &score_scaled);
-    score_scaled.x += 8*3;
+    score_scaled.x += 8*2;
     score_scaled.y += 8;
     SDL_BlitScaled(plancheSprites, &tiret, win_surf, &score_scaled);
+    // On affiche le score de base à 0
+    score_scaled.x += 8*2;
+    score_scaled.y -= 8;
+    SDL_BlitScaled(plancheSprites, &sprite_0, win_surf, &score_scaled);
+    score_scaled.x += 8*2;
+    SDL_BlitScaled(plancheSprites, &sprite_0, win_surf, &score_scaled);
+
+
+    // Ici on remarque que la largeur est de 16*7 pixels (unscaled) car le score est à 7 chiffres max
+    SDL_Rect black_bg_score_unscaled = { score_scaled.x-32, score_scaled.y, 16*7, 7};
+    // Correspond au background noir du score (pour l'effacer et le réécrire par derrière)
+    black_bg_score = entity_scaled(black_bg_score_unscaled); 
+
+    // On peut posséder jusqu'à 5 vies normalement (cas où on mange les 4 fantômes d'un coup)
+    SDL_Rect black_bg_lives_unscaled = {16, SCREEN_HEIGHT-16, 16*5, 16};
+    black_bg_lives = entity_scaled(black_bg_lives_unscaled);
+
 
     // Affichage des vies (partie immobile donc initialisée ici): (à faire)
 
@@ -118,6 +127,7 @@ View::View(
     m_pinky_direction = m_pinky->get_direction();
     m_inky_direction = m_inky->get_direction();
     m_clyde_direction = m_clyde->get_direction();
+
     // Et on initialise les types de sprites à 1 :
     sprite_pacman_animation = 1;
     sprite_blinky_animation = 1;
@@ -125,9 +135,11 @@ View::View(
     sprite_inky_animation = 1;
     sprite_clyde_animation = 1;
 
-    frame = 0;
-
+    m_frame = 0;
+    m_score = 0;
+    m_lives = 2;
 }
+
 View::~View(){
     // On free les sprites 
     SDL_FreeSurface(plancheSprites);
@@ -139,6 +151,14 @@ View::~View(){
     SDL_DestroyWindow(m_window);
 
     SDL_Quit();
+}
+
+void View::set_score(int score){
+    m_score = score;
+}
+
+void View::set_lives(int lives){
+    m_lives = lives;
 }
 
 SDL_Window *View::getWindow(){
@@ -154,6 +174,8 @@ SDL_Rect View::entity_scaled(SDL_Rect entity){
     SDL_Rect scaled_entity = {entity.x*3 - 24, entity.y*3 - 24, entity.w*3, entity.h*3};
     return scaled_entity;
 }
+
+
 // Fonction de base pour afficher les sprites (réutilisable pour les autres fonctions)
 void View::draw_beginning(){
 
@@ -186,28 +208,33 @@ void View::draw_beginning(){
 }
 
 void View::erase_point(std::vector<std::pair<int,int>> points){
-    // SDL_SetColorKey(plancheSprites, false, 0);
-    // SDL_BlitScaled(plancheSprites, &src_bg, win_surf, &bg);
-    // SDL_SetColorKey(plancheSprites, true, 0);
     for (auto point : points){
         SDL_Rect point_case = {point.first*8 + 8, point.second*8 + 8, 8, 8}; // Case de point
         SDL_Rect point_scaled = entity_scaled(point_case);
         SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &point_scaled);
     }
-    SDL_SetColorKey(plancheSprites, false, 0);
-
 }
 
+void View::draw_score(){
+    
+    SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &black_bg_score);
+    // SDL_BlitScaled(plancheSprites, &m_blinky_sprite, win_surf, &black_bg_score);
+    // On récupère les chiffres du score
+    // std::string score_string = std::to_string(m_score);
+
+
+}
 void View::draw(){
     change_sprite();
     // On définit le noir comme non-transparent pour la planche de sprites
     SDL_SetColorKey(plancheSprites, false, 0);
     // SDL_SetColorKey(background, false, 0);
     // On remplit la fenêtre de noir pour éviter les bugs d'affichage (on ne peut pas afficher de score sinon)
-    // SDL_FillRect(win_surf, &black_bg, SDL_MapRGB(win_surf->format, 0, 0, 0));
+    // SDL_FillRect(win_surf, &black_bg_score, SDL_MapRGB(win_surf->format, 0, 0, 0));
     SDL_BlitScaled(plancheSprites, &src_bg, win_surf, &bg);
     std::vector<std::pair<int,int>> points = m_terrain->get_eaten(); 
     erase_point(points);
+    draw_score();
     
     // On définit le noir comme transparent lorsqu'on affiche les sprites
     
@@ -235,7 +262,7 @@ void View::draw(){
     
     // SDL_SetColorKey(background, true, 0);
 
-    frame++;
+    m_frame++;
 }
 
 
@@ -243,11 +270,16 @@ void View::draw(){
 
 
 
-void View::draw_score(int score){
+// void View::draw_score(int score){
 
     
 
-}
+// }
+
+
+// void View::draw_lives(int lives){
+
+// }
 
 void View::change_sprite(){
 
@@ -268,7 +300,7 @@ void View::change_sprite(){
                 break;
         }
     }
-    if (frame%8 == 0){
+    if (m_frame%8 == 0){
         switch(m_pacman_direction){
             case Direction::Direction::Left:
                 if ( sprite_pacman_animation == 1){
@@ -319,58 +351,58 @@ void View::change_sprite(){
         m_blinky_direction = m_blinky->get_direction();
         switch (m_blinky_direction){
             case Direction::Direction::Left:
-                m_blinky_sprite = {717, 66, 16, 16};
+                m_blinky_sprite = {717, 65, 16, 16};
                 break;
             case Direction::Direction::Right:
-                m_blinky_sprite = {685, 66, 16, 16};
+                m_blinky_sprite = {685, 65, 16, 16};
                 break;
             case Direction::Direction::Up:
-                m_blinky_sprite = {749, 66, 16, 16};
+                m_blinky_sprite = {749, 65, 16, 16};
                 break;
             case Direction::Direction::Down:
-                m_blinky_sprite = {781, 66, 16, 16};
+                m_blinky_sprite = {781, 65, 16, 16};
                 break;
         }
     }
-    if (frame%8 == 0){
+    if (m_frame%8 == 0){
         switch(m_blinky_direction){
             case Direction::Direction::Left:
                 if ( sprite_blinky_animation == 1){
-                    m_blinky_sprite = {733, 66, 16, 16};
+                    m_blinky_sprite = {733, 65, 16, 16};
                     sprite_blinky_animation = 2;
                 }
                 else{
-                    m_blinky_sprite = {717, 66, 16, 16};
+                    m_blinky_sprite = {717, 65, 16, 16};
                     sprite_blinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Right:
                 if ( sprite_blinky_animation == 1){
-                    m_blinky_sprite = {701, 66, 16, 16};
+                    m_blinky_sprite = {701, 65, 16, 16};
                     sprite_blinky_animation = 2;
                 }
                 else{
-                    m_blinky_sprite = {685, 66, 16, 16};
+                    m_blinky_sprite = {685, 65, 16, 16};
                     sprite_blinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Up:
                 if ( sprite_blinky_animation == 1){
-                    m_blinky_sprite = {765, 66, 16, 16};
+                    m_blinky_sprite = {765, 65, 16, 16};
                     sprite_blinky_animation = 2;
                 }
                 else{
-                    m_blinky_sprite = {749, 66, 16, 16};
+                    m_blinky_sprite = {749, 65, 16, 16};
                     sprite_blinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Down:
                 if ( sprite_blinky_animation == 1){
-                    m_blinky_sprite = {797, 66, 16, 16};
+                    m_blinky_sprite = {797, 65, 16, 16};
                     sprite_blinky_animation = 2;
                 }
                 else{
-                    m_blinky_sprite = {781, 66, 16, 16};
+                    m_blinky_sprite = {781, 65, 16, 16};
                     sprite_blinky_animation = 1;
                 }
                 break;
@@ -381,59 +413,59 @@ void View::change_sprite(){
         m_pinky_direction = m_pinky->get_direction();
         switch (m_pinky_direction){
             case Direction::Direction::Left:
-                m_pinky_sprite = {717, 82, 16, 16};
+                m_pinky_sprite = {717, 81, 16, 16};
                 break;
             case Direction::Direction::Right:
-                m_pinky_sprite = {685, 82, 16, 16};
+                m_pinky_sprite = {685, 81, 16, 16};
                 break;
             case Direction::Direction::Up:
-                m_pinky_sprite = {749, 82, 16, 16};
+                m_pinky_sprite = {749, 81, 16, 16};
                 break;
             case Direction::Direction::Down:
-                m_pinky_sprite = {781, 82, 16, 16};
+                m_pinky_sprite = {781, 81, 16, 16};
                 break;
         }
     }
 
-    if (frame%8 == 0){
+    if (m_frame%8 == 0){
         switch(m_pinky_direction){
             case Direction::Direction::Left:
                 if ( sprite_pinky_animation == 1){
-                    m_pinky_sprite = {733, 82, 16, 16};
+                    m_pinky_sprite = {733, 81, 16, 16};
                     sprite_pinky_animation = 2;
                 }
                 else{
-                    m_pinky_sprite = {717, 82, 16, 16};
+                    m_pinky_sprite = {717, 81, 16, 16};
                     sprite_pinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Right:
                 if ( sprite_pinky_animation == 1){
-                    m_pinky_sprite = {701, 82, 16, 16};
+                    m_pinky_sprite = {701, 81, 16, 16};
                     sprite_pinky_animation = 2;
                 }
                 else{
-                    m_pinky_sprite = {685, 82, 16, 16};
+                    m_pinky_sprite = {685, 81, 16, 16};
                     sprite_pinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Up:
                 if ( sprite_pinky_animation == 1){
-                    m_pinky_sprite = {765, 82, 16, 16};
+                    m_pinky_sprite = {765, 81, 16, 16};
                     sprite_pinky_animation = 2;
                 }
                 else{
-                    m_pinky_sprite = {749, 82, 16, 16};
+                    m_pinky_sprite = {749, 81, 16, 16};
                     sprite_pinky_animation = 1;
                 }
                 break;
             case Direction::Direction::Down:
                 if ( sprite_pinky_animation == 1){
-                    m_pinky_sprite = {797, 82, 16, 16};
+                    m_pinky_sprite = {797, 81, 16, 16};
                     sprite_pinky_animation = 2;
                 }
                 else{
-                    m_pinky_sprite = {781, 82, 16, 16};
+                    m_pinky_sprite = {781, 81, 16, 16};
                     sprite_pinky_animation = 1;
                 }
                 break;
@@ -444,59 +476,59 @@ void View::change_sprite(){
         m_inky_direction = m_inky->get_direction();
         switch (m_inky_direction){
             case Direction::Direction::Left:
-                m_inky_sprite = {717, 98, 16, 16};
+                m_inky_sprite = {717, 97, 16, 16};
                 break;
             case Direction::Direction::Right:
-                m_inky_sprite = {685, 98, 16, 16};
+                m_inky_sprite = {685, 97, 16, 16};
                 break;
             case Direction::Direction::Up:
-                m_inky_sprite = {749, 98, 16, 16};
+                m_inky_sprite = {749, 97, 16, 16};
                 break;
             case Direction::Direction::Down:
-                m_inky_sprite = {781, 98, 16, 16};
+                m_inky_sprite = {781, 97, 16, 16};
                 break;
         }
     }
 
-    if (frame%8 == 0){
+    if (m_frame%8 == 0){
         switch(m_inky_direction){
             case Direction::Direction::Left:
                 if ( sprite_inky_animation == 1){
-                    m_inky_sprite = {733, 98, 16, 16};
+                    m_inky_sprite = {733, 97, 16, 16};
                     sprite_inky_animation = 2;
                 }
                 else{
-                    m_inky_sprite = {717, 98, 16, 16};
+                    m_inky_sprite = {717, 97, 16, 16};
                     sprite_inky_animation = 1;
                 }
                 break;
             case Direction::Direction::Right:
                 if ( sprite_inky_animation == 1){
-                    m_inky_sprite = {701, 98, 16, 16};
+                    m_inky_sprite = {701, 97, 16, 16};
                     sprite_inky_animation = 2;
                 }
                 else{
-                    m_inky_sprite = {685, 98, 16, 16};
+                    m_inky_sprite = {685, 97, 16, 16};
                     sprite_inky_animation = 1;
                 }
                 break;
             case Direction::Direction::Up:
                 if ( sprite_inky_animation == 1){
-                    m_inky_sprite = {765, 98, 16, 16};
+                    m_inky_sprite = {765, 97, 16, 16};
                     sprite_inky_animation = 2;
                 }
                 else{
-                    m_inky_sprite = {749, 98, 16, 16};
+                    m_inky_sprite = {749, 97, 16, 16};
                     sprite_inky_animation = 1;
                 }
                 break;
             case Direction::Direction::Down:
                 if ( sprite_inky_animation == 1){
-                    m_inky_sprite = {797, 98, 16, 16};
+                    m_inky_sprite = {797, 97, 16, 16};
                     sprite_inky_animation = 2;
                 }
                 else{
-                    m_inky_sprite = {781, 98, 16, 16};
+                    m_inky_sprite = {781, 97, 16, 16};
                     sprite_inky_animation = 1;
                 }
                 break;
@@ -507,59 +539,59 @@ void View::change_sprite(){
         m_clyde_direction = m_clyde->get_direction();
         switch (m_clyde_direction){
             case Direction::Direction::Left:
-                m_clyde_sprite = {717, 114, 16, 16};
+                m_clyde_sprite = {717, 113, 16, 16};
                 break;
             case Direction::Direction::Right:
-                m_clyde_sprite = {685, 114, 16, 16};
+                m_clyde_sprite = {685, 113, 16, 16};
                 break;
             case Direction::Direction::Up:
-                m_clyde_sprite = {749, 114, 16, 16};
+                m_clyde_sprite = {749, 113, 16, 16};
                 break;
             case Direction::Direction::Down:
-                m_clyde_sprite = {781, 114, 16, 16};
+                m_clyde_sprite = {781, 113, 16, 16};
                 break;
         }
     }
 
-    if (frame%8 == 0){
+    if (m_frame%8 == 0){
         switch(m_clyde_direction){
             case Direction::Direction::Left:
                 if ( sprite_clyde_animation == 1){
-                    m_clyde_sprite = {733, 114, 16, 16};
+                    m_clyde_sprite = {733, 113, 16, 16};
                     sprite_clyde_animation = 2;
                 }
                 else{
-                    m_clyde_sprite = {717, 114, 16, 16};
+                    m_clyde_sprite = {717, 113, 16, 16};
                     sprite_clyde_animation = 1;
                 }
                 break;
             case Direction::Direction::Right:
                 if ( sprite_clyde_animation == 1){
-                    m_clyde_sprite = {701, 114, 16, 16};
+                    m_clyde_sprite = {701, 113, 16, 16};
                     sprite_clyde_animation = 2;
                 }
                 else{
-                    m_clyde_sprite = {685, 114, 16, 16};
+                    m_clyde_sprite = {685, 113, 16, 16};
                     sprite_clyde_animation = 1;
                 }
                 break;
             case Direction::Direction::Up:
                 if ( sprite_clyde_animation == 1){
-                    m_clyde_sprite = {765, 114, 16, 16};
+                    m_clyde_sprite = {765, 113, 16, 16};
                     sprite_clyde_animation = 2;
                 }
                 else{
-                    m_clyde_sprite = {749, 114, 16, 16};
+                    m_clyde_sprite = {749, 113, 16, 16};
                     sprite_clyde_animation = 1;
                 }
                 break;
             case Direction::Direction::Down:
                 if ( sprite_clyde_animation == 1){
-                    m_clyde_sprite = {797, 114, 16, 16};
+                    m_clyde_sprite = {797, 113, 16, 16};
                     sprite_clyde_animation = 2;
                 }
                 else{
-                    m_clyde_sprite = {781, 114, 16, 16};
+                    m_clyde_sprite = {781, 113, 16, 16};
                     sprite_clyde_animation = 1;
                 }
                 break;
