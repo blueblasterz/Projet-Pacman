@@ -101,6 +101,9 @@ View::View(
     // On affiche le score de base à 0
     score_scaled.x += 8*2;
     score_scaled.y -= 8;
+
+    m_number_sprite_0 = {230, 272, 7, 7};
+
     SDL_BlitScaled(plancheSprites, &m_number_sprite_0, win_surf, &score_scaled);
     score_scaled.x += 8*2;
     SDL_BlitScaled(plancheSprites, &m_number_sprite_0, win_surf, &score_scaled);
@@ -210,7 +213,7 @@ View::View(
     m_score_sprite_800 = {736, 130, 16, 16};
     m_score_sprite_1600 = {759, 130, 16, 16};
 
-    m_number_sprite_0 = {230, 272, 7, 7};
+
 
 }
 
@@ -782,90 +785,18 @@ void View::change_sprite(SDL_Rect pos){
 
 // Lorsqu'ils sont apeurés :
 
-// void View::change_sprite_fright(Ghost* ghost, SDL_Rect pos, Direction::Direction direction){
-
-//     if ( m_pacman_direction != m_pacman->get_direction() ){ // Changement de direction
-//         m_pacman_direction = m_pacman->get_direction();
-//         switch (m_pacman_direction){
-//             case Direction::Direction::Left:
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_1, win_surf, &pos);
-//                 break;
-//             case Direction::Direction::Right:
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_right_1, win_surf, &pos);
-//                 break;
-//             case Direction::Direction::Up:
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_up_1, win_surf, &pos);  
-//                 break;
-//             case Direction::Direction::Down:
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_down_1, win_surf, &pos);
-//                 break;
-//         }
-//     }
-//     switch(m_pacman_direction){
-//         case Direction::Direction::Left:
-//             if ( sprite_pacman_animation == 1 && m_frame % 8 == 0){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_2, win_surf, &pos);
-//                 sprite_pacman_animation = 2;
-//             }
-//             else if (m_frame % 8 == 0 && sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_1, win_surf, &pos);
-//                 sprite_pacman_animation = 1;
-//             }
-//             else if (sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_2, win_surf, &pos);
-//             }
-//             else{
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_1, win_surf, &pos);
-//             }
-//             break;
-//         case Direction::Direction::Right:
-//             if ( sprite_pacman_animation == 1 && m_frame % 8 == 0){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_right_2, win_surf, &pos);
-//                 sprite_pacman_animation = 2;
-//             }
-//             else if (m_frame % 8 == 0 && sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_right_1, win_surf, &pos);
-//                 sprite_pacman_animation = 1;
-//             }
-//             else if (sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_right_2, win_surf, &pos);
-//             }
-//             else{
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_right_1, win_surf, &pos);
-//             }
-//             break;
-//         case Direction::Direction::Up:
-//             if ( sprite_pacman_animation == 1 && m_frame % 8 == 0){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_up_2, win_surf, &pos);
-//                 sprite_pacman_animation = 2;
-//             }
-//             else if (m_frame % 8 == 0 && sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_up_1, win_surf, &pos);
-//                 sprite_pacman_animation = 1;
-//             }
-//             else if (sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_up_2, win_surf, &pos);
-//             }
-//             else{
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_up_1, win_surf, &pos);
-//             }
-//             break;
-//         case Direction::Direction::Down:
-//             if ( sprite_pacman_animation == 1 && m_frame % 8 == 0){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_down_2, win_surf, &pos);
-//                 sprite_pacman_animation = 2;
-//             }
-//             else if (m_frame % 8 == 0 && sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_down_1, win_surf, &pos);
-//                 sprite_pacman_animation = 1;
-//             }
-//             else if (sprite_pacman_animation == 2){
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_down_2, win_surf, &pos);
-//             }
-//             else{
-//                 SDL_BlitScaled(plancheSprites, &m_pacman_sprite_down_1, win_surf, &pos);
-//             }
-//             break;
-//     }
-
-// }
+void View::change_sprite_fright(Ghost* ghost, SDL_Rect pos){
+    int n = m_frame%32;
+    if (n < 8){
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_1, win_surf, &pos);
+    }
+    else if (n < 16){
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_2, win_surf, &pos);
+    }
+    else if (n < 24){
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_3, win_surf, &pos);
+    }
+    else{
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_4, win_surf, &pos);
+    }
+}
