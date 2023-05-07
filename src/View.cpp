@@ -119,7 +119,7 @@ View::View(
     // Correspond au background noir du score (pour l'effacer et le réécrire par derrière)
 
     // On peut posséder jusqu'à 5 vies normalement (cas où on mange les 4 fantômes d'un coup)
-    black_bg_lives = {48, SCREEN_HEIGHT-48, 16*5, 16};
+    black_bg_lives = {48, SCREEN_HEIGHT-48, 48*5, 48};
     position_lives = {get_rect_x(black_bg_lives), get_rect_y(black_bg_lives), 48, 48};
 
     bg_message = {12*8*3-24, 21*8*3-24, 6*8, 6*8};
@@ -307,10 +307,7 @@ void View::draw_score(){
 }
 
 void View::draw_lives(){
-
     SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &black_bg_lives);
-
-
     // On récupère la position du score : 
     for (int i = 0; i < m_logic->get_life(); i++){
     
@@ -353,12 +350,12 @@ void View::draw_start(){
 
 }
 
-void View::draw_win(){
+// void View::draw_win(){
 
-    SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message2);
-    position_message.x += 24;
+//     SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message2);
+//     position_message.x += 24;
 
-}
+// }
 
 void View::draw(){
     // Ghost::State state = m_blinky->get_state();
@@ -374,15 +371,15 @@ void View::draw(){
     
     SDL_SetColorKey(plancheSprites, true, 0);
 
-
-    
-
-    if (m_logic->get_life() == 0){
-        // draw_game_over();
+    // if (m_logic->get_life() == 0){
+    //     // draw_game_over();
+    // }
+    if (m_logic->is_paused()){
+        draw_pause();
     }
-
-    
-
+    else if (m_logic->show_ready()){
+        draw_start();
+    }
     
     SDL_Rect pos = {int(m_blinky->get_x()*3-24), int(m_blinky->get_y()*3-24), 48, 48};
     
