@@ -181,3 +181,10 @@ std::vector<Direction::Direction> Terrain::get_possib(
     }
     return res;
 }
+
+
+std::vector<std::pair<int,int>> get_eaten() {
+    std::vector<std::pair<int,int>> res;
+
+    return res;
+}

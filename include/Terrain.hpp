@@ -39,6 +39,7 @@ public:
 
     // int action_pacman(std::pair<double,double> pos);
 
+    std::vector<std::pair<int,int>> get_eaten();
 
 protected:
 
