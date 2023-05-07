@@ -56,6 +56,7 @@ public:
     // et gère la transition de FRIGHT à NORMAL
     void check_collision_ghost(std::shared_ptr<Ghost> ghost);
 
+    void set_compteur_reset(int a);
 
     int get_life();
 
@@ -94,4 +95,7 @@ protected:
 
     // compteur utilisé au moment du reset
     int m_compteur_reset;
+
+    // nb de frame depuis le dernier mangeage de dot
+    int m_frame_last_eaten;
 };

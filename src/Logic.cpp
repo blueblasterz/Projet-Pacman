@@ -56,7 +56,10 @@ Logic::Logic(
     m_fright(false),
     m_nb_dot_eaten(0),
     m_rng(42),
-    m_current_ghost_score(200)
+    m_current_ghost_score(200),
+    m_life(4),
+    m_compteur_reset(0),
+    m_frame_last_eaten(0)
 {
     // m_pacman->print_position();
     this->init_new_level();
@@ -76,10 +79,21 @@ void Logic::set_score(int score) {
 void Logic::do_frame() {
     if(m_compteur_reset != 0) {
         m_compteur_reset -= 1;
-
-        if(m_compteur_reset == 60) {
+        // if(m_compteur_reset == 80) {
+        // }
+        if(m_compteur_reset == 80) {
+            m_pacman->set_is_dead(false);
             place_entities();
+            if(m_nb_dot_eaten == 244) {
+                init_new_level();
+            }
         }
+
+        return;
+    }
+    if(m_nb_dot_eaten == 244) {
+        cout << "FIN DU NIVEAU BRAVO" << endl;
+        m_compteur_reset = 120;
         return;
     }
 
@@ -91,16 +105,32 @@ void Logic::do_frame() {
         // std::cout << "DOT" << std::endl;
         m_score += 10;
         m_pacman->add_stopped(1);
+        m_nb_dot_eaten += 1;
+        m_frame_last_eaten = 0;
     }
     else if(eaten == 2) {
+        m_frame_last_eaten = 0;
         std::cout << "SUPERDOT" << std::endl;
         m_score += 50;
+        m_nb_dot_eaten += 1;
         m_pacman->set_energy(60*m_settings.fright_time);
         m_pacman->add_stopped(3);
         m_blinky->set_logic_state(Ghost::L_FRIGHT);
         m_pinky->set_logic_state(Ghost::L_FRIGHT);
         m_inky->set_logic_state(Ghost::L_FRIGHT);
         m_clyde->set_logic_state(Ghost::L_FRIGHT);
+    }
+    else {
+        m_frame_last_eaten += 1;
+        if(m_frame_last_eaten == 180) {
+            if(m_inky->is_idling()) {
+                m_inky->set_is_starting(true);
+            }
+            else if(m_clyde->is_idling()) {
+                m_clyde->set_is_starting(true);
+            }
+            m_frame_last_eaten=0;
+        }
     }
     
     // les fantomes utilisent la nouvelle position de pacman
@@ -154,6 +184,8 @@ void Logic::init_new_level() {
     place_entities();
 
     m_current_ghost_score = 200;
+    m_nb_dot_eaten = 0;
+    m_frame = 0;
 }
 
 void Logic::place_entities() {
@@ -197,7 +229,72 @@ void Logic::place_entities() {
 }
 
 void Logic::do_events() {
-
+    if( m_frame == m_settings.scatter.at(0)*60) { // fin premier scatter
+        cout << "debut chase 1" << endl;
+        m_blinky->set_logic_state(Ghost::L_CHASE);
+        m_pinky->set_logic_state( Ghost::L_CHASE);
+        m_inky->set_logic_state(  Ghost::L_CHASE);
+        m_clyde->set_logic_state( Ghost::L_CHASE);
+    }
+    if( m_frame == m_settings.chase.at(0)*60) { // fin premier chase
+        cout << "debut scatter 2" << endl;
+        m_blinky->set_logic_state(Ghost::L_SCATTER);
+        m_pinky->set_logic_state( Ghost::L_SCATTER);
+        m_inky->set_logic_state(  Ghost::L_SCATTER);
+        m_clyde->set_logic_state( Ghost::L_SCATTER);
+    }
+    if( m_frame == m_settings.scatter.at(1)*60) { // fin 2e scatter
+        cout << "debut chase 2 " << endl;
+        m_blinky->set_logic_state(Ghost::L_CHASE);
+        m_pinky->set_logic_state( Ghost::L_CHASE);
+        m_inky->set_logic_state(  Ghost::L_CHASE);
+        m_clyde->set_logic_state( Ghost::L_CHASE);
+    }
+    if( m_frame == m_settings.chase.at(1)*60) { // fin 2e chase
+        cout << "debut scatter 3" << endl;
+        m_blinky->set_logic_state(Ghost::L_SCATTER);
+        m_pinky->set_logic_state( Ghost::L_SCATTER);
+        m_inky->set_logic_state(  Ghost::L_SCATTER);
+        m_clyde->set_logic_state( Ghost::L_SCATTER);
+    }
+    if( m_frame == m_settings.scatter.at(2)*60) { // fin 3e scatter
+        cout << "debut chase 3" << endl;
+        m_blinky->set_logic_state(Ghost::L_CHASE);
+        m_pinky->set_logic_state( Ghost::L_CHASE);
+        m_inky->set_logic_state(  Ghost::L_CHASE);
+        m_clyde->set_logic_state( Ghost::L_CHASE);
+    }
+    if( m_frame == m_settings.chase.at(2)*60) { // fin 3e chase
+        cout << "debut scatter 4" << endl;
+        m_blinky->set_logic_state(Ghost::L_SCATTER);
+        m_pinky->set_logic_state( Ghost::L_SCATTER);
+        m_inky->set_logic_state(  Ghost::L_SCATTER);
+        m_clyde->set_logic_state( Ghost::L_SCATTER);
+    }
+    if( m_frame == m_settings.scatter.at(3)*60) { // fin dernier scatter
+        cout << "debut chase infinie" << endl;
+        m_blinky->set_logic_state(Ghost::L_CHASE);
+        m_pinky->set_logic_state( Ghost::L_CHASE);
+        m_inky->set_logic_state(  Ghost::L_CHASE);
+        m_clyde->set_logic_state( Ghost::L_CHASE);
+    }
+    if(m_level==1) {
+        if(m_nb_dot_eaten == 30 && m_inky->is_idling()) {
+            m_inky->set_is_starting(true);
+        }
+        if(m_nb_dot_eaten==90 && m_clyde->is_idling()) {
+            m_clyde->set_is_starting(true);
+        }
+    }
+    else if(m_level == 2) {
+        if(m_frame == 0) {
+            
+            m_inky->set_is_starting(true);
+        }
+        if(m_nb_dot_eaten==30 && m_clyde->is_idling()) {
+            m_clyde->set_is_starting(true);
+        }
+    }
 }
 
 double Logic::compute_dx(double speed, Direction::Direction dir) {
@@ -560,9 +657,10 @@ void Logic::check_collision_ghost(std::shared_ptr<Ghost> ghost) {
     int energy_left = m_pacman->is_energized();
     if(energy_left == 1) {
         // fin du fright
-        ghost->set_logic_state(Ghost::L_RECOVER);   
+        ghost->set_logic_state(Ghost::L_RECOVER);
+        ghost->set_state(Ghost::NORMAL);
     }
-    else if(energy_left == 120) {
+    else if(energy_left == 60) {
         ghost->set_state(Ghost::FRIGHT_END);   
     }
     if( m_pacman->get_tile() == ghost->get_tile() ) {
@@ -586,4 +684,8 @@ void Logic::check_collision_ghost(std::shared_ptr<Ghost> ghost) {
 
 int Logic::get_life() {
     return m_life;
+}
+
+void Logic::set_compteur_reset(int a) {
+    m_compteur_reset = a;
 }

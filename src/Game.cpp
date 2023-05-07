@@ -36,7 +36,8 @@ Game::Game() :
         m_pinky,
         m_inky,
         m_clyde,
-        m_terrain
+        m_terrain,
+        m_logic
     ))
     {
     // m_pacman = std::make_shared<Pacman>();
@@ -73,9 +74,11 @@ void Game::launch() {
 
     // m_blinky->set_is_idling(true);
 
+    m_logic->set_compteur_reset(120);
+
     
     bool quit = false;
-    bool pause = true;
+    bool pause = false;
     int frame(0); // compte le nombre de frames qui se sont écoulées
     while (!quit)
     {
