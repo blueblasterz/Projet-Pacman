@@ -28,7 +28,7 @@ void Inky::compute_target() {
     vise 2*( pos_pacman_decal - pos_blinky) 
     */
 
-    if(m_scatter) {
+    if(m_state==Ghost::SCATTER) {
         m_target = m_scatter_target;
     }
     else {

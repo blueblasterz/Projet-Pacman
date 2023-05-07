@@ -15,13 +15,23 @@ Direction::Direction Direction::reverse(Direction dir) {
     return Direction::Left;
 }
 
+std::pair<int,int> Direction::tile_in_dir(
+    std::pair<int,int> tile, Direction dir) {
+    switch(dir) {
+        case Direction::Up: return {tile.first, tile.second-1};
+        case Direction::Down: return {tile.first, tile.second+1};
+        case Direction::Left: return {tile.first-1, tile.second};
+        case Direction::Right: return {tile.first+1, tile.second};
+    }
+}
 
 Entity::Entity() : Entity(0.0,0.0) {}
 
 
 Entity::Entity(double x, double y) 
 : m_x(x),
-  m_y(y) {
+  m_y(y),
+  m_frame_stopped(0) {
     m_tile_x = round(m_x);
     m_tile_y = round(m_y);
 }
@@ -126,4 +136,19 @@ void Entity::set_speed(double speed) {
     else {
         m_speed = speed;
     }
+}
+
+bool Entity::is_stopped() {
+    if (m_frame_stopped != 0) {
+        m_frame_stopped -= 1;
+        return true;
+    }
+    return false;
+}
+
+void Entity::add_stopped(int add) {
+    if(m_frame_stopped + add > 0)
+        m_frame_stopped += add;
+    else
+        m_frame_stopped = 0;
 }

@@ -43,13 +43,15 @@ Terrain::Terrain() {
             m_intersec.at(x).at(y) = false;
         }
     }
+    this->load_tilemap();
+}
 
+Terrain::~Terrain() {}
+
+void Terrain::load_tilemap() {
     int x = 0;
     int y = 0;
-
     for(char c : TILEMAP) {
-        // cout << x << " " << y << endl;
-        // cout << c;
         switch(c) {
             case '\n':
                 x = 0;
@@ -90,15 +92,12 @@ Terrain::Terrain() {
                 x++;
                 break;
             default:
-                // cout << "\n\n-> <" << c << ">" << endl;
-                // cout << x << " " << y << endl;
                 if(y!=36) m_tiles.at(x).at(y) = Tile::Error;
                 x++;
         }      
-    }   
+    }
+    m_eaten_tiles.clear();
 }
-
-Terrain::~Terrain() {}
 
 void Terrain::print_terrain() {
     for(int y=0 ; y<36 ; y++) {
@@ -208,4 +207,5 @@ int Terrain::add_eaten(std::pair<int,int> pos) {
         m_tiles.at(pos.first).at(pos.second) = Tile::Empty;
         return (tile == Tile::Dot) ? 1 : 2;
     }
+    return 0;
 }

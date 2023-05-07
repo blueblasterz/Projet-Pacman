@@ -23,7 +23,7 @@ void Pinky::compute_target() {
     Sauf si pacman regarde vers le haut, 
     dans ce cas vise 4 case au dessus +4 à gauche
     */
-    if(m_scatter) {
+    if(m_state==Ghost::SCATTER) {
         m_target = m_scatter_target;
     }
     else {

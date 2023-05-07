@@ -25,7 +25,7 @@ void Clyde::compute_target() {
     */
     // std::cout << "Clyde : compute_target" << std::endl;
     // std::cout << "distance : " << this->dist(m_pacman) << "px  /8 = " << this->dist(m_pacman)/8. << std::endl;
-    if(m_scatter || this->dist(m_pacman)/8. <= 8.) {
+    if(m_state==Ghost::SCATTER || this->dist(m_pacman)/8. <= 8.) {
         m_target = m_scatter_target;
     }
     else {
