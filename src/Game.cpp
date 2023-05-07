@@ -49,13 +49,17 @@ void Game::launch() {
     m_pacman->set_pos(112,212);
     m_pacman->set_speed(0.8);
 
-    // m_blinky->set_pos(112,116);
-    m_blinky->set_tile(14,32);
+    m_blinky->set_pos(112,116);
+    // m_blinky->set_tile(14,32);
     m_blinky->set_direction(Direction::Left);
     m_blinky->set_speed(0.75);
+    m_blinky->set_state(Ghost::CHASE);
+
     m_pinky->set_pos(112,140);
     m_pinky->set_direction(Direction::Left);
     m_pinky->set_speed(0.75);
+    m_pinky->set_state(Ghost::STARTING);
+    
     m_inky->set_pos(96,140);
     m_inky->set_direction(Direction::Left);
     m_inky->set_speed(0.75);
@@ -67,6 +71,7 @@ void Game::launch() {
     bool quit = false;
     bool pause = true;
     bool one_frame = false;
+    int frame(0); // compte le nombre de frames qui se sont écoulées
     while (!quit)
     {
         SDL_Event event;
@@ -81,13 +86,13 @@ void Game::launch() {
                 switch(event.key.keysym.sym) {
                     case SDLK_f:
                         m_logic->do_frame();
-                        cout << m_pacman->get_pos() << endl;
+                        // cout << m_pacman->get_pos() << endl;
                         break;
                     case SDLK_p:
                         pause = !pause;
                         break;
                     case SDLK_d:
-                        cout << "Pacman : " << m_pacman->get_tile() << endl;
+                        cout << "Pacman : " << m_pacman->get_tile() << m_pacman->get_pos() << endl;
                         cout << "Blinky : " << m_blinky->get_tile() << endl;
                         break;
                     case SDLK_s:
@@ -96,6 +101,20 @@ void Game::launch() {
                         else 
                             m_pacman->set_speed(0.8);
                         break;
+                    case SDLK_e:
+                        cout << "Eaten tiles : " << endl;
+                        for(auto tile : m_terrain->get_eaten()) {
+                            cout << tile << "\n";
+                        }
+                        cout << "--" << endl;
+                        break;
+                    case SDLK_c: // lancer clyde
+                        m_clyde->set_state(Ghost::STARTING);
+                        break;
+                    case SDLK_i: // lancer inky
+                        m_inky->set_state(Ghost::STARTING);
+                        break;
+                    default: break;
                 }
                 break;
             default: break;

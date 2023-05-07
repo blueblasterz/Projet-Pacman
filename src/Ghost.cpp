@@ -18,8 +18,9 @@ Ghost::Ghost(
     m_scatter(false),
     m_tunnel_speed(0.4),
     m_locked_direction(false),
-    m_is_caged(true) {
-    
+    m_is_caged(true),
+    m_dot_counter(0),
+    m_state(Ghost::IDLE) {
 }
 Ghost::Ghost(
     std::pair<int,int> pos,
@@ -67,4 +68,21 @@ void Ghost::set_is_caged(bool caged) {
 }
 bool Ghost::is_caged() {
     return m_is_caged;
+}
+
+int Ghost::get_counter_anim() {
+    return m_counter_anim;
+}
+void Ghost::inc_counter_anim() {
+    m_counter_anim++;
+}
+void Ghost::reset_counter_anim() {
+    m_counter_anim = 0;
+}
+
+Ghost::State Ghost::get_state() {
+    return m_state;
+}
+void Ghost::set_state(Ghost::State state) {
+    m_state = state;
 }

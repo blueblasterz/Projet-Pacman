@@ -6,6 +6,7 @@
 
 class Pacman;
 
+
 class Ghost : public Entity{
 public:
     Ghost();
@@ -20,6 +21,16 @@ public:
         std::pair<int,int> scatter_pos);
     ~Ghost();
 
+    enum State {
+        CHASE,    // chasse pacman
+        SCATTER,  // vise le coin
+        FRIGHT,   // appeuré
+        END_FRIGHT, // appeuré et clignotant
+        EATEN,    // quand le fantome a été mangé et doit revenir au centre
+        IDLE,     // bloqué au centre
+        STARTING  // en train de sortir du centre
+    };
+
     virtual void compute_target() =0;
     
     std::pair<int,int> get_target();
@@ -33,6 +44,14 @@ public:
 
     void set_is_caged(bool caged);
     bool is_caged();
+
+    int get_counter_anim();
+    void inc_counter_anim();
+    void reset_counter_anim();
+
+    State get_state();
+    void set_state(State state);
+
 
 protected:
     // contient la case visée par le fantome actuellement
@@ -56,5 +75,16 @@ protected:
     // est-ce que le fantome est bloqué dans la cage ?
     // autrement dit est-ce qu'il a le droit de passer la porte
     bool m_is_caged;
+
+    // compteur de dot mangés
+    // permet la logique de sortie des fantomes
+    bool m_dot_counter;
+
+    // variable qui donne l'état actuel du fantôme
+    State m_state;
+
+    // variable pour suivre l'évolution d'une animation
+    // (IDLE, STARTING)
+    int m_counter_anim;
 
 };

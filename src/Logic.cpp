@@ -34,14 +34,25 @@ Logic::Logic(
     // m_pacman->print_position();
 }
 
+int Logic::get_score() {
+    return m_score;
+}
+int Logic::add_score(int add) {
+    m_score += add;
+    return m_score;
+}
+void Logic::set_score(int score) {
+    m_score = score;
+}
+
 void Logic::do_frame() {
     move_pacman();
     int eaten = m_terrain->add_eaten(m_pacman->get_tile());
     if(eaten == 1) {
-        std::cout << "DOT" << std::endl;
+        // std::cout << "DOT" << std::endl;
     }
     else if(eaten == 2) {
-        std::cout << "SUPERDOT" << std::endl;
+        // std::cout << "SUPERDOT" << std::endl;
     }
     // les fantomes utilisent la nouvelle position de pacman
     move_ghost(m_blinky);
@@ -143,6 +154,14 @@ void Logic::move_pacman() {
 }
 
 void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
+    if(ghost->get_state() == Ghost::IDLE) {
+        this->do_idle_ghost(ghost);
+        return;
+    }
+    if(ghost->get_state() == Ghost::STARTING) {
+        this->do_get_out(ghost);
+        return;
+    }
     static bool second_try = false;
 
     double speed = ghost->get_speed();
@@ -253,3 +272,56 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
         second_try=false;
     }
 }
+
+void Logic::do_idle_ghost(std::shared_ptr<Ghost> ghost) {
+    int frame = ghost->get_counter_anim();
+    
+    if(frame%2 == 0) {
+        if( (frame+10)%40 < 20) {
+            ghost->move(0,-1);
+            ghost->set_direction(Direction::Up);
+        }
+        else {
+            ghost->move(0,1);
+            ghost->set_direction(Direction::Down);
+
+        }
+    }
+    ghost->inc_counter_anim();
+}
+
+void Logic::do_get_out(std::shared_ptr<Ghost> ghost) {
+    std::pair<int,int> pos = ghost->get_pos();
+    // std::cout << pos.first << " " << pos.second << std::endl;
+    int frame = ghost->get_counter_anim();
+    if( pos.first != 112 && frame%2==0 ) {
+        if(pos.first > 112) {
+            ghost->move(-1,0);
+            ghost->set_direction(Direction::Left);
+
+        }
+        else {
+            ghost->move(1,0);
+            ghost->set_direction(Direction::Right);
+        }
+        if( ghost->get_x() == 112 ) {
+            ghost->reset_counter_anim();
+        }
+        else {
+            ghost->inc_counter_anim();
+        }
+    }
+    else {
+        if(pos.second != 116 and frame%2==0) {
+            ghost->move(0,-1);
+            ghost->set_direction(Direction::Up);
+        }
+        ghost->inc_counter_anim();
+        if(ghost->get_y() == 116) {
+            ghost->set_direction(Direction::Left);
+            ghost->reset_counter_anim();
+            ghost->set_state(Ghost::CHASE);
+        }
+    }
+}
+

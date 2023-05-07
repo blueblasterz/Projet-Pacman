@@ -154,29 +154,39 @@ std::vector<Direction::Direction> Terrain::get_possib(
 {
     std::vector<Direction::Direction> res;
     std::pair<int,int> pos = ghost->get_tile();
+    std::pair<int,int> test_pos = pos;
     Direction::Direction rev_dir = reverse(ghost->get_direction());
 
-    pos.second -= 1; // Up
-    if(this->is_gate(pos) ) { // cas particulier : libération des fantomes
+    // UP
+    test_pos.first = pos.first;
+    test_pos.second = pos.second-1;
+    if(this->is_gate(test_pos) ) { // cas particulier : libération des fantomes
         res.push_back(Direction::Up);
         return res;
     }
-    if( (rev_dir != Direction::Up && !this->is_wall(pos))) {
+    if( (rev_dir != Direction::Up && !this->is_wall(test_pos))
+    && !( (pos.first == 12 && pos.second == 26) // autre cas part :
+        ||(pos.first == 15 && pos.second == 26) // 4 intersections où les fantomes
+        ||(pos.first == 12 && pos.second == 14) // n'ont pas le droit de monter
+        ||(pos.first == 15 && pos.second == 14) ) ) {
         res.push_back(Direction::Up);
     }
-    pos.second +=1;
-    pos.first -= 1; // Left 
-    if( rev_dir != Direction::Left && !this->is_wall(pos) ) {
+    // LEFT
+    test_pos.first = pos.first-1;
+    test_pos.second = pos.second;
+    if( rev_dir != Direction::Left && !this->is_wall(test_pos) ) {
         res.push_back(Direction::Left);
     }
-    pos.first += 1;
-    pos.second += 1; // Down
-    if( rev_dir != Direction::Down && !this->is_wall(pos) ) {
+    // DOWN
+    test_pos.first = pos.first;
+    test_pos.second = pos.second+1;
+    if( rev_dir != Direction::Down && !this->is_wall(test_pos) ) {
         res.push_back(Direction::Down);
     }
-    pos.second -= 1;
-    pos.first += 1; // Right 
-    if( rev_dir != Direction::Right && !this->is_wall(pos) ) {
+    // RIGHT
+    test_pos.first = pos.first+1;
+    test_pos.second = pos.second;
+    if( rev_dir != Direction::Right && !this->is_wall(test_pos) ) {
         res.push_back(Direction::Right);
     }
     return res;

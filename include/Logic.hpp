@@ -20,6 +20,10 @@ public:
         std::shared_ptr<Terrain> &terrain
     );
 
+    int get_score();
+    int add_score(int add);
+    void set_score(int score);
+
     void do_frame();
 
 
@@ -28,6 +32,9 @@ public:
 
     void move_pacman();
     void move_ghost(std::shared_ptr<Ghost> ghost);
+
+    void do_idle_ghost(std::shared_ptr<Ghost> ghost);
+    void do_get_out(std::shared_ptr<Ghost> ghost);
 
 
 protected:
@@ -38,4 +45,11 @@ protected:
     std::shared_ptr<Pinky> m_pinky;
     std::shared_ptr<Inky> m_inky;
     std::shared_ptr<Terrain> m_terrain;
+
+    // le score de PACMAN
+    int m_score;
+    // nombre de frames qui se sont écoulées depuis le début du niveau
+    int frame;
+    // le niveau actuel (modifie la difficulté)
+    int level;
 };
