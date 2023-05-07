@@ -34,6 +34,16 @@ public:
     */
     void set_rect(SDL_Rect *rect, int x, int y);
 
+    /*
+    Permet de modifier le score du joueur
+    */
+    void set_score(int score);
+
+    /*
+    Permet de modifier le nombre de vies
+    */
+    void set_lives(int lives);
+
     /* 
     Fonction prototype de draw() avec les positions de base du début de partie
     */
@@ -55,12 +65,22 @@ public:
     /*
     Fonction permettant de dessiner la valeur du score en haut de la fenêtre de jeu.
     */
-    void draw_score(int score);
+    void draw_score();
 
     /*
     Permet de changer le sprite des entités en fonction de leur direction
     */
     void change_sprite();
+
+    /*
+    Permet de dessiner le nombre de vies restantes du pacman
+    */
+    // void draw_lives(int lives);
+
+    /*
+    Permet de dessiner le score du joueur
+    */
+    // void draw_score(int score);
 
 protected:
     // pointeurs vers les modèles (Pacman, ghost..)
@@ -74,8 +94,7 @@ protected:
 
     // Terrain pour récupérer les coordonnées des pacgums mangés
     Terrain *m_terrain;
-    // Variable temporaire
-    // std::vector<std::pair<int,int>> points;
+    
 
     // On récupère les direction pour l'animation des sprites
     Direction::Direction m_pacman_direction;
@@ -84,7 +103,9 @@ protected:
     Direction::Direction m_inky_direction;
     Direction::Direction m_clyde_direction;
 
-    int frame;
+    int m_frame;
+    int m_score;
+    int m_lives;
 
     // pointeurs vers les rectangles correspondant aux coordonnées des sprites
     SDL_Rect m_pacman_sprite;
@@ -97,10 +118,16 @@ protected:
     int sprite_inky_animation;
     SDL_Rect m_clyde_sprite;
     int sprite_clyde_animation;
+    // Sprite du terrain de jeu
     SDL_Rect src_bg;
+    // Zone de jeu (toute la fenêtre en gros)
     SDL_Rect bg;
+    // Case noire pour effacer les points
     SDL_Rect bg_pointless;
-    SDL_Rect black_bg;
+    // Case noire pour effacer le score
+    SDL_Rect black_bg_score;
+    // Case noire pour effacer les vies
+    SDL_Rect black_bg_lives;
 
     // pointeurs vers les fenêtres et rendu
     SDL_Window* m_window;
