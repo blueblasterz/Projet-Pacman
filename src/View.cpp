@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "Entity.hpp"
-#include "Sprite_anim.hpp"
+#include <vector>
 
 #define SCREEN_WIDTH   672
 #define SCREEN_HEIGHT  864
@@ -13,12 +13,14 @@ View::View(
         Entity* blinky,
         Entity* pinky,
         Entity* inky,
-        Entity* clyde)
+        Entity* clyde,
+        Terrain* terrain)
         : m_pacman(pacman),
         m_blinky(blinky),
         m_pinky(pinky),
         m_inky(inky),
-        m_clyde(clyde)
+        m_clyde(clyde),
+        m_terrain(terrain)
         {
     // Initialisation du rendu et de la fenêtre
     int rendererFlags, windowFlags;
@@ -76,7 +78,15 @@ View::View(
     m_pinky_sprite = {685, 81, 16, 16};
     m_inky_sprite = {685, 97, 16, 16};
     m_clyde_sprite = {685, 113, 16, 16};
-    bg_pointless = {18, 115, 8, 8}; // Petite case noire de 8x8 pixels
+    bg_pointless = {474, 327, 16, 16}; // Petite case noire de 16x16 pixels
+
+    // points = {
+    //     {1, 4},
+    //     {2, 4},
+    //     {3, 4},
+    //     {4, 4},
+    //     {16, 17}
+    // };
 
     // Affichage score (partie immobile donc initialisée ici):
 
@@ -175,6 +185,19 @@ void View::draw_beginning(){
     
 }
 
+void View::erase_point(std::vector<std::pair<int,int>> points){
+    // SDL_SetColorKey(plancheSprites, false, 0);
+    // SDL_BlitScaled(plancheSprites, &src_bg, win_surf, &bg);
+    // SDL_SetColorKey(plancheSprites, true, 0);
+    for (auto point : points){
+        SDL_Rect point_case = {point.first*8 + 8, point.second*8 + 8, 8, 8}; // Case de point
+        SDL_Rect point_scaled = entity_scaled(point_case);
+        SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &point_scaled);
+    }
+    SDL_SetColorKey(plancheSprites, false, 0);
+
+}
+
 void View::draw(){
     change_sprite();
     // On définit le noir comme non-transparent pour la planche de sprites
@@ -183,6 +206,8 @@ void View::draw(){
     // On remplit la fenêtre de noir pour éviter les bugs d'affichage (on ne peut pas afficher de score sinon)
     // SDL_FillRect(win_surf, &black_bg, SDL_MapRGB(win_surf->format, 0, 0, 0));
     SDL_BlitScaled(plancheSprites, &src_bg, win_surf, &bg);
+    std::vector<std::pair<int,int>> points = m_terrain->get_eaten(); 
+    erase_point(points);
     
     // On définit le noir comme transparent lorsqu'on affiche les sprites
     
@@ -213,15 +238,8 @@ void View::draw(){
     frame++;
 }
 
-// void View::erase_point(){
 
-    // SDL_SetColorKey(plancheSprites, false, 0);
-    // SDL_Rect point_scaled = entity_scaled(bg_pointless);
-    // SDL_Rect pacman_case = {pacman->get_x()*3, pacman->get_y()*3, 48, 48}; // Case de pacman
-    // SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &pacman_case);
-    // SDL_SetColorKey(plancheSprites, true, 0);
 
-// }
 
 
 

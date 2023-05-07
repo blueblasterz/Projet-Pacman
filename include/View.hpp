@@ -3,7 +3,8 @@
 #include "Entity.hpp"
 #include <SDL2/SDL.h>
 #include <iostream>
-
+#include <vector>
+#include "Terrain.hpp"
 
 
 
@@ -15,7 +16,8 @@ public:
         Entity* blinky,
         Entity* pinky,
         Entity* inky,
-        Entity* clyde
+        Entity* clyde,
+        Terrain* terrain
         );
     ~View();
 
@@ -48,7 +50,7 @@ public:
     Fonction permettant de remplacer la tuile de la case où se trouve le pacman par une tuile de la
     map où il n'y a rien (case vide). Cela permet ainsi de faire disparaitre le point au centre d'une tuile.
     */
-    // void erase_point();
+    void erase_point(std::vector<std::pair<int,int>> points);
 
     /*
     Fonction permettant de dessiner la valeur du score en haut de la fenêtre de jeu.
@@ -69,6 +71,11 @@ protected:
     Entity* m_inky;
     Entity* m_clyde;
 
+
+    // Terrain pour récupérer les coordonnées des pacgums mangés
+    Terrain *m_terrain;
+    // Variable temporaire
+    // std::vector<std::pair<int,int>> points;
 
     // On récupère les direction pour l'animation des sprites
     Direction::Direction m_pacman_direction;

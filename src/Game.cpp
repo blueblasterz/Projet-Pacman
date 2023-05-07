@@ -35,7 +35,8 @@ Game::Game() {
         m_blinky.get(),
         m_pinky.get(),
         m_inky.get(),
-        m_clyde.get()
+        m_clyde.get(),
+        m_terrain.get()
     );
     cout << "Fin de l'initialisation" << endl;
 }
