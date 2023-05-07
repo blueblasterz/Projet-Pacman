@@ -375,7 +375,7 @@ void View::draw(){
     SDL_SetColorKey(plancheSprites, true, 0);
 
 
-    SDL_Rect pos = {int(m_pacman->get_x()*3-24), int(m_pacman->get_y()*3-24), 48, 48};
+    
 
     if (m_logic->get_life() == 0){
         // draw_game_over();
@@ -383,14 +383,9 @@ void View::draw(){
 
     
 
-    if (!m_pacman->is_dead()){
-        change_sprite(pos);
-    }
-    else{
-        change_sprite_death(pos);
-    }
     
-    set_Rect_scaled(&pos, m_blinky->get_x(), m_blinky->get_y());
+    SDL_Rect pos = {int(m_blinky->get_x()*3-24), int(m_blinky->get_y()*3-24), 48, 48};
+    
     animation_ghost(pos, m_blinky.get(), 0);
 
     set_Rect_scaled(&pos, m_pinky->get_x(), m_pinky->get_y());
@@ -401,6 +396,14 @@ void View::draw(){
 
     set_Rect_scaled(&pos, m_clyde->get_x(), m_clyde->get_y());
     animation_ghost(pos, m_clyde.get(), 3);
+
+    set_Rect_scaled(&pos, m_pacman->get_x(), m_pacman->get_y());
+    if (!m_pacman->is_dead()){
+        change_sprite(pos);
+    }
+    else{
+        change_sprite_death(pos);
+    }
     
     m_frame++;
 }
