@@ -6,25 +6,29 @@
 #include <string.h>
 #include "Ghost.hpp"
 #include "Pacman.hpp"
+#include "Logic.hpp"
 
 #define SCREEN_WIDTH   672
 #define SCREEN_HEIGHT  864
 
 
 View::View(
+        
         std::shared_ptr<Pacman> pacman,
         std::shared_ptr<Ghost> blinky,
         std::shared_ptr<Ghost> pinky,
         std::shared_ptr<Ghost> inky,
         std::shared_ptr<Ghost> clyde,
-        std::shared_ptr<Terrain> terrain
+        std::shared_ptr<Terrain> terrain,
+        std::shared_ptr<Logic> logic
         )
-        : m_pacman(pacman.get()),
-        m_blinky(blinky.get()),
-        m_pinky(pinky.get()),
-        m_inky(inky.get()),
-        m_clyde(clyde.get()),
-        m_terrain(terrain.get()),
+        : m_pacman(pacman),
+        m_blinky(blinky),
+        m_pinky(pinky),
+        m_inky(inky),
+        m_clyde(clyde),
+        m_terrain(terrain),
+        m_logic(logic),
         m_window(nullptr, SDL_DestroyWindow)
         {
     // Initialisation du rendu et de la fenêtre
@@ -118,7 +122,11 @@ View::View(
     black_bg_lives = {48, SCREEN_HEIGHT-48, 16*5, 16};
     position_lives = {get_rect_x(black_bg_lives), get_rect_y(black_bg_lives), 48, 48};
 
-
+    bg_message = {12*8*3-24, 21*8*3-24, 6*8, 6*8};
+    position_message = {get_rect_x(bg_message), get_rect_y(bg_message), 8*3, 8*3};
+    position_message2 = {get_rect_x(bg_message), get_rect_y(bg_message)+8*3, 8*3, 8*3};
+    
+    
     // Affichage des vies (partie immobile donc initialisée ici): (à faire)
 
     // On récupère les directions pour l'animation des sprites
@@ -215,7 +223,22 @@ View::View(
     m_score_sprite_800 = {736, 130, 16, 16};
     m_score_sprite_1600 = {759, 130, 16, 16};
 
-
+    m_letter_sprite_A = {230, 290, 7, 7};
+    m_letter_sprite_C = {246, 290, 7, 7};
+    m_letter_sprite_D = {254, 290, 7, 7};
+    m_letter_sprite_E = {262, 290, 7, 7};
+    m_letter_sprite_G = {278, 290, 7, 7};
+    m_letter_sprite_L = {318, 290, 7, 7};
+    m_letter_sprite_M = {326, 290, 7, 7};
+    m_letter_sprite_O = {342, 290, 7, 7};
+    m_letter_sprite_P = {230, 298, 7, 7};
+    m_letter_sprite_R = {246, 298, 7, 7};
+    m_letter_sprite_S = {254, 298, 7, 7};
+    m_letter_sprite_T = {262, 298, 7, 7};
+    m_letter_sprite_U = {270, 298, 7, 7};
+    m_letter_sprite_V = {278, 298, 7, 7};
+    m_letter_sprite_Y = {303, 298, 7, 7};
+    m_letter_sprite_excl = {318, 298, 7, 7};
 
 }
 
@@ -253,8 +276,6 @@ SDL_Rect View::entity_scaled(SDL_Rect entity){
     return scaled_entity;
 }
 
-
-
 void View::set_Rect_scaled(SDL_Rect *rect, double x, double y){
     rect->x = x*3 - 24;
     rect->y = y*3 - 24;
@@ -263,6 +284,7 @@ void View::set_Rect_scaled(SDL_Rect *rect, double x, double y){
 int View::get_rect_x(SDL_Rect rect) const{
     return rect.x;
 }
+
 int View::get_rect_y(SDL_Rect rect) const{
     return rect.y;
 }
@@ -277,9 +299,9 @@ void View::erase_point(std::vector<std::pair<int,int>> points){
 void View::draw_score(){
 
     SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &black_bg_score);
-
+    int score = m_logic->get_score();
     // On récupère les chiffres du score
-    std::string score_string = std::to_string(m_score);
+    std::string score_string = std::to_string(score);
     for (size_t i = 0; i < score_string.size(); i++){
         int score_digit = score_string[i] - '0';
         set_rect(&m_number_sprite_0, 230 + 8*score_digit, 272);
@@ -292,16 +314,58 @@ void View::draw_score(){
 }
 
 void View::draw_lives(){
-    
+
+    int lives = m_logic->get_life();
     SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &black_bg_lives);
 
     // On récupère la position du score : 
-    for (int i = 0; i < m_lives; i++){
+    for (int i = 0; i < lives; i++){
     
         SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_1, win_surf, &position_lives);
         position_lives.x += 48;
     }
     position_lives.x = black_bg_lives.x;
+}
+
+void View::draw_pause(){
+
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_P, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_A, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_S, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_E, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_excl, win_surf, &position_message);
+    position_message.x = get_rect_x(bg_message);
+}
+
+void View::draw_start(){
+
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_R, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_E, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_A, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_D, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_Y, win_surf, &position_message);
+    position_message.x += 24;
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_excl, win_surf, &position_message);
+    position_message.x = get_rect_x(bg_message);
+
+}
+
+void View::draw_win(){
+
+    SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message2);
+    position_message.x += 24;
+    
+
 }
 
 void View::draw(){
@@ -318,13 +382,20 @@ void View::draw(){
     
     SDL_SetColorKey(plancheSprites, true, 0);
 
+
     SDL_Rect pos = {int(m_pacman->get_x()*3-24), int(m_pacman->get_y()*3-24), 48, 48};
 
-    if (m_lives == 0){
-        change_sprite_death(pos);
+    if (m_logic->get_life() == 0){
+        // draw_game_over();
+    }
+
+    
+
+    if (!m_pacman->is_dead()){
+        change_sprite(pos);
     }
     else{
-        change_sprite(pos);
+        change_sprite_death(pos);
     }
     
     set_Rect_scaled(&pos, m_blinky->get_x(), m_blinky->get_y());
@@ -341,6 +412,8 @@ void View::draw(){
     
     m_frame++;
 }
+
+
 
 
 // On a une fonction d'animation de base pour chaque entités

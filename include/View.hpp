@@ -7,6 +7,7 @@
 #include "Terrain.hpp"
 #include "Pacman.hpp"
 #include "Ghost.hpp"
+#include "Logic.hpp"
 
 
 
@@ -19,7 +20,8 @@ public:
         std::shared_ptr<Ghost> clyde,
         std::shared_ptr<Ghost> pinky,
         std::shared_ptr<Ghost> inky,
-        std::shared_ptr<Terrain> terrain
+        std::shared_ptr<Terrain> terrain,
+        std::shared_ptr<Logic> logic
         );
     ~View();
 
@@ -72,6 +74,31 @@ public:
     void draw_score();
 
     /*
+    Permet de dessiner le nombre de vies restantes du pacman
+    */
+    void draw_lives();
+
+    /*
+    Permet d'afficher un message de game over lorsque le joueur n'a plus de vies
+    */
+    void draw_game_over();
+
+    /*
+    Permet d'afficher un message de victoire lorsque le joueur a mangé tous les points
+    */
+    void draw_win();
+
+    /*
+    Permet d'afficher un message de pause lorsque le joueur appuie sur la touche "p"
+    */
+    void draw_pause();
+
+    /*
+    Permet d'afficher un message de début de partie lorsque le joueur appuie sur la touche "s"
+    */
+    void draw_start();
+
+    /*
     Permet de changer le sprite de PacMan en fonction de sa direction
     */
     void change_sprite(SDL_Rect position_scaled);
@@ -104,7 +131,7 @@ public:
     change_sprite_fright(), change_sprite_eaten() et change_sprite_score().
     */
     void change_sprite_fright(SDL_Rect pos);
-    
+
     void change_sprite_fright_end(SDL_Rect position_scaled);
 
     void change_sprite_eaten(Ghost* ghost, SDL_Rect position_scaled);
@@ -113,15 +140,19 @@ public:
 
     void change_sprite_score(SDL_Rect pos, int score);
 
+    /*
+    Fonction liant les différents affichage de chaque états des fantômes
+    Elle permet ainsi d'afficher le bon sprite.
+    */
     void animation_ghost(SDL_Rect pos, Ghost* ghost, int name);
 
-    /*
-    Permet de dessiner le nombre de vies restantes du pacman
-    */
-    void draw_lives();
+
 
  
 protected:
+
+    
+
     // pointeurs vers les modèles (Pacman, ghost..)
     // On a pas de pointeurs pour le terrain car il n'est pas censé bouger
     std::shared_ptr<Pacman> m_pacman;
@@ -132,6 +163,8 @@ protected:
 
     // Terrain pour récupérer les coordonnées des pacgums mangés
     std::shared_ptr<Terrain> m_terrain;
+
+    std::shared_ptr<Logic> m_logic;
 
     // On récupère les direction pour l'animation des sprites
     Direction::Direction m_pacman_direction;
@@ -156,6 +189,11 @@ protected:
     SDL_Rect src_bg;
     // Zone de jeu (toute la fenêtre en gros)
     SDL_Rect bg;
+
+    // Zone d'affichage de messages
+    SDL_Rect bg_message;
+    SDL_Rect position_message;
+    SDL_Rect position_message2;
 
     // Case noire pour effacer les points
     SDL_Rect bg_pointless;
@@ -253,5 +291,20 @@ protected:
 
     SDL_Rect m_number_sprite_0;
 
-
+    SDL_Rect m_letter_sprite_A;
+    SDL_Rect m_letter_sprite_C;
+    SDL_Rect m_letter_sprite_D;
+    SDL_Rect m_letter_sprite_E;
+    SDL_Rect m_letter_sprite_G;
+    SDL_Rect m_letter_sprite_L;
+    SDL_Rect m_letter_sprite_M;
+    SDL_Rect m_letter_sprite_O;
+    SDL_Rect m_letter_sprite_P;
+    SDL_Rect m_letter_sprite_R;
+    SDL_Rect m_letter_sprite_S;
+    SDL_Rect m_letter_sprite_T;
+    SDL_Rect m_letter_sprite_U;
+    SDL_Rect m_letter_sprite_V;
+    SDL_Rect m_letter_sprite_Y;
+    SDL_Rect m_letter_sprite_excl;
     };
