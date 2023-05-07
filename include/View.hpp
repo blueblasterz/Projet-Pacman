@@ -103,7 +103,17 @@ public:
     Rq : Cela vaut aussi pour les fonctions change_sprite_fright_end(), 
     change_sprite_fright(), change_sprite_eaten() et change_sprite_score().
     */
-    void change_sprite_fright(Ghost* ghost, SDL_Rect position_scaled);
+    void change_sprite_fright(SDL_Rect pos);
+    
+    void change_sprite_fright_end(SDL_Rect position_scaled);
+
+    void change_sprite_eaten(Ghost* ghost, SDL_Rect position_scaled);
+
+    void change_sprite_death(SDL_Rect position_scaled);
+
+    void change_sprite_score(SDL_Rect pos, int score);
+
+    void animation_ghost(SDL_Rect pos, Ghost* ghost, int name);
 
     /*
     Permet de dessiner le nombre de vies restantes du pacman
@@ -140,6 +150,7 @@ protected:
     int sprite_pinky_animation;
     int sprite_inky_animation;
     int sprite_clyde_animation;
+    int death_animation;
 
     // Sprite du terrain de jeu
     SDL_Rect src_bg;

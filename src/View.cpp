@@ -135,6 +135,8 @@ View::View(
     sprite_inky_animation = 1;
     sprite_clyde_animation = 1;
 
+    death_animation = 0;
+
     m_frame = 0;
     m_score = 0;
     m_lives = 4;
@@ -316,21 +318,26 @@ void View::draw(){
     
     SDL_SetColorKey(plancheSprites, true, 0);
 
-
     SDL_Rect pos = {int(m_pacman->get_x()*3-24), int(m_pacman->get_y()*3-24), 48, 48};
-    change_sprite(pos);
 
+    if (m_lives == 0){
+        change_sprite_death(pos);
+    }
+    else{
+        change_sprite(pos);
+    }
+    
     set_Rect_scaled(&pos, m_blinky->get_x(), m_blinky->get_y());
-    change_sprite_b(pos);
+    animation_ghost(pos, m_blinky.get(), 0);
 
     set_Rect_scaled(&pos, m_pinky->get_x(), m_pinky->get_y());
-    change_sprite_p(pos);
+    animation_ghost(pos, m_pinky.get(), 1);
 
     set_Rect_scaled(&pos, m_inky->get_x(), m_inky->get_y());
-    change_sprite_i(pos);
+    animation_ghost(pos, m_inky.get(), 2);
 
     set_Rect_scaled(&pos, m_clyde->get_x(), m_clyde->get_y());
-    change_sprite_c(pos);
+    animation_ghost(pos, m_clyde.get(), 3);
     
     m_frame++;
 }
@@ -785,7 +792,19 @@ void View::change_sprite(SDL_Rect pos){
 
 // Lorsqu'ils sont apeurés :
 
-void View::change_sprite_fright(Ghost* ghost, SDL_Rect pos){
+void View::change_sprite_fright(SDL_Rect pos){
+
+    int n = m_frame%16;
+    if (n < 8){
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_1, win_surf, &pos);
+    }
+    else if (n < 16){
+        SDL_BlitScaled(plancheSprites, &m_fright_sprite_2, win_surf, &pos);
+    }
+
+}
+
+void View::change_sprite_fright_end(SDL_Rect pos){
     int n = m_frame%32;
     if (n < 8){
         SDL_BlitScaled(plancheSprites, &m_fright_sprite_1, win_surf, &pos);
@@ -800,3 +819,134 @@ void View::change_sprite_fright(Ghost* ghost, SDL_Rect pos){
         SDL_BlitScaled(plancheSprites, &m_fright_sprite_4, win_surf, &pos);
     }
 }
+
+// Lorsqu'ils sont mangés :
+
+void View::change_sprite_eaten(Ghost* ghost, SDL_Rect pos){
+    switch (ghost->get_direction()){
+        case Direction::Direction::Left:
+            SDL_BlitScaled(plancheSprites, &m_eaten_sprite_left , win_surf, &pos);
+            break;
+        case Direction::Direction::Right:
+            SDL_BlitScaled(plancheSprites, &m_eaten_sprite_right, win_surf, &pos);
+            break;
+        case Direction::Direction::Up:
+            SDL_BlitScaled(plancheSprites, &m_eaten_sprite_up, win_surf, &pos);  
+            break;
+        case Direction::Direction::Down:
+            SDL_BlitScaled(plancheSprites, &m_eaten_sprite_down, win_surf, &pos);
+            break;
+    }
+}
+
+// Lorsque PacMan meurt :
+
+void View::change_sprite_death(SDL_Rect pos){
+    int n = death_animation%88;
+    if (n < 8){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_1, win_surf, &pos);
+    }
+    else if (n < 16){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_2, win_surf, &pos);
+    }
+    else if (n < 24){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_3, win_surf, &pos);
+    }
+    else if (n < 32){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_4, win_surf, &pos);
+    }
+    else if (n < 40){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_5, win_surf, &pos);
+    }
+    else if (n < 48){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_6, win_surf, &pos);
+    }
+    else if (n < 56){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_7, win_surf, &pos);
+    }
+    else if (n < 64){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_8, win_surf, &pos);
+    }
+    else if (n < 72){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_9, win_surf, &pos);
+    }
+    else if (n < 80){
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_10, win_surf, &pos);
+    }
+    else{
+        SDL_BlitScaled(plancheSprites, &m_pacman_sprite_dead_11, win_surf, &pos);
+    }
+    death_animation++;
+    if (death_animation == 88){
+        death_animation = 0;
+    }
+}
+
+// Lorsque les fantômes se font manger (ils se transforment en score) :
+
+void View::change_sprite_score(SDL_Rect pos, int score){
+
+    switch (score)
+    {
+    case 200:
+        SDL_BlitScaled(plancheSprites, &m_score_sprite_200, win_surf, &pos);
+        break;
+    case 400:
+        SDL_BlitScaled(plancheSprites, &m_score_sprite_400, win_surf, &pos);
+        break;
+    case 800:
+        SDL_BlitScaled(plancheSprites, &m_score_sprite_800, win_surf, &pos);
+        break;
+    case 1600:
+        SDL_BlitScaled(plancheSprites, &m_score_sprite_1600, win_surf, &pos);
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void View::animation_ghost(SDL_Rect pos, Ghost* ghost, int name){
+    Ghost::State state = ghost->get_state();
+    switch (state)
+    {
+    case Ghost::State::NORMAL:
+        switch (name)
+        {
+        case 0:
+            change_sprite_b(pos);
+            break;
+        case 1:
+            change_sprite_p(pos);
+            break;
+        case 2:
+            change_sprite_i(pos);
+            break;
+        case 3:
+            change_sprite_c(pos);
+            break;
+        default:
+            break;
+        }
+        break;
+
+    case Ghost::State::FRIGHT_END:
+        change_sprite_fright_end(pos);
+        break;
+
+    case Ghost::State::FRIGHT:
+        change_sprite_fright(pos);
+        break;
+
+    case Ghost::State::EATEN:
+        change_sprite_eaten(ghost, pos);
+        break;
+
+    case Ghost::State::SCORE:
+        change_sprite_score(pos, ghost->get_score());
+        break;
+    default:
+        break;
+    }
+}
+
