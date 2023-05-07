@@ -19,6 +19,8 @@ public:
     Terrain();
     ~Terrain();
 
+    void load_tilemap();
+
     void print_terrain();
 
     bool is_intersection(std::pair<double,double> pos);

@@ -3,7 +3,8 @@
 #include <memory>
 #include <array>
 
-#define DEFAULT_SPEED 1.
+// #define DEFAULT_SPEED 75.75757625/60 
+#define DEFAULT_SPEED 1.0 
 
 namespace Direction {
     enum Direction : int {
@@ -13,6 +14,7 @@ namespace Direction {
         Down
     };
     Direction reverse(Direction dir);
+    std::pair<int,int> tile_in_dir(std::pair<int,int> tile, Direction dir);
 }
 
 
@@ -53,6 +55,12 @@ public:
     double get_speed();
     void set_speed(double speed);
 
+    // renvois vrai si m_frame_stopped != 0, et réduit de 1 m_frame_stopped
+    // renvois faux sinon
+    bool is_stopped();
+    // ajoute des frame d'immobilité à l'entitée
+    void add_stopped(int add);
+
     // vitesse par défaut, en px/frame (ne dépend pas de l'entité)
     static constexpr double default_speed = DEFAULT_SPEED;
 protected:
@@ -71,4 +79,10 @@ protected:
     // la direction vers laquelle l'entité regarde
     Direction::Direction m_direction;
 
+    // nombre de frame où l'entitée ne bouge pas
+    // si != 0, est réduit de 1 à la fin d'une frame
+    // si 0, l'entitée peut bouger normalement
+    int m_frame_stopped;
+
 };
+

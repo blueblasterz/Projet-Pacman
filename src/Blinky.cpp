@@ -6,7 +6,7 @@ Blinky::Blinky(
     double x,
     double y,
     std::shared_ptr<Pacman> &pacman)
-:   Ghost(x,y,pacman, {0,25})
+:   Ghost(x,y,pacman, {25,0})
 {
 
 }
@@ -21,7 +21,7 @@ void Blinky::compute_target() {
     Pour Blinky (le rouge), c'est très facile :
     il ne fait que viser Pacman directement.
     */
-    if(m_scatter) {
+    if(m_state==Ghost::SCATTER) {
         m_target = m_scatter_target;
     }
     else {
