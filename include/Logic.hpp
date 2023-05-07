@@ -46,8 +46,18 @@ public:
     // charge les données du niveau suivant.
     void init_new_level();
 
+    // met les entités à leur point de départ
+    void place_entities();
+
     // les événements timés : changement scatter/chase
     void do_events();
+
+    // vérifie s'il y a des fantomes mangés
+    // et gère la transition de FRIGHT à NORMAL
+    void check_collision_ghost(std::shared_ptr<Ghost> ghost);
+
+
+    int get_life();
 
 protected:
     // pointeurs vers les modèles (Pacman, ghost..)
@@ -74,4 +84,14 @@ protected:
     int m_nb_dot_eaten;
 
     std::mt19937 m_rng;
+
+    // le score gagné en mangeant un fantome
+    // double à chaque fantome mangé avec le meme superdot
+    int m_current_ghost_score;
+
+    // nombre de vies
+    int m_life;
+
+    // compteur utilisé au moment du reset
+    int m_compteur_reset;
 };

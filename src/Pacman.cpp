@@ -7,7 +7,8 @@ Pacman::Pacman() : Pacman(104.0,204.0){}
 Pacman::Pacman(double x, double y) 
 : Entity(x,y),
   m_energy_timer(0),
-  m_next_dir(Direction::Left) {
+  m_next_dir(Direction::Left),
+  m_is_dead(false) {
     this->set_speed(0.8);
 }
 
@@ -39,4 +40,12 @@ void Pacman::set_next_dir(Direction::Direction dir) {
 }
 Direction::Direction Pacman::get_next_dir() {
     return m_next_dir;
+}
+
+void Pacman::set_is_dead(bool b) {
+    m_is_dead = b;
+}
+
+bool Pacman::is_dead() {
+    return m_is_dead;
 }

@@ -49,7 +49,8 @@ Ghost::Ghost(
     m_is_idling(false),
     m_is_starting(false),
     m_is_eaten(false),
-    m_score(200) {
+    m_score(200),
+    m_dir_retour({0,0}) {
 }
 Ghost::Ghost(
     std::pair<int,int> pos,
@@ -183,4 +184,11 @@ void Ghost::set_score(int score) {
 }
 int Ghost::get_score() {
     return m_score;
+}
+
+void Ghost::update_dir_retour() {
+    m_dir_retour = { (112.-m_x)/120., (140.-m_y)/120.};
+}
+std::pair<double,double> Ghost::get_dir_retour() {
+    return m_dir_retour;
 }

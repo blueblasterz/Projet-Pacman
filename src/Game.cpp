@@ -177,13 +177,13 @@ void Game::launch() {
         if(!pause) {
             m_logic->do_frame();
             frame ++;
-            if(frame%60 == 0) {
-                cout << "Blinky    : " << m_blinky->get_tile() << endl;
-                cout << "  dir     : " << m_blinky->get_direction() << endl;
-                cout << "  l_state : " << m_blinky->get_logic_state() << endl;
-                cout << "  state   : " << m_blinky->get_state() << endl;
-                cout << endl;
-                cout << "energy_Pacman : " << m_pacman->is_energized() << endl << endl;
+            if(frame%1 == 0) {
+                // cout << "Pinky    : " << m_pinky->get_tile() << endl;
+                // cout << "  dir     : " << m_pinky->get_direction() << endl;
+                // cout << "  l_state : " << m_pinky->get_logic_state() << endl;
+                // cout << "  state   : " << m_pinky->get_state() << endl;
+                // cout << endl;
+                // cout << "energy_Pacman : " << m_pacman->is_energized() << endl << endl;
             }
             // cout << m_pacman->get_pos() << endl;
             // cout << m_pinky->get_target() << endl;

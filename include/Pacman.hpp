@@ -19,10 +19,15 @@ public:
     void set_next_dir(Direction::Direction dir);
     Direction::Direction get_next_dir();
 
+    void set_is_dead(bool b);
+    bool is_dead();
+
 protected:
     // nbre de frames de "super-pacman", 0 = pas super
     int m_energy_timer;
     
     Direction::Direction m_next_dir;
+
+    bool m_is_dead;
 
 };

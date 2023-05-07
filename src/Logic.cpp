@@ -23,6 +23,14 @@ std::ostream& operator << ( std::ostream& out,
     out << "(" << p.first << ", " << p.second << ")";
     return out;
 }
+
+// template<typename T,typename U>
+// bool operator== ( const std::pair< T, U >& p, 
+//                 const std::pair< T, U >& q )
+// {
+//     return p.first == q.first && p.second == q.second;
+// }
+
 // distance entre 2 points
 double distance( std::pair<int,int> a, std::pair<int,int> b ) {
     return sqrt( pow(a.first*8-b.first*8,2) 
@@ -47,7 +55,8 @@ Logic::Logic(
     m_level(0),
     m_fright(false),
     m_nb_dot_eaten(0),
-    m_rng(42)
+    m_rng(42),
+    m_current_ghost_score(200)
 {
     // m_pacman->print_position();
     this->init_new_level();
@@ -65,16 +74,27 @@ void Logic::set_score(int score) {
 }
 
 void Logic::do_frame() {
+    if(m_compteur_reset != 0) {
+        m_compteur_reset -= 1;
+
+        if(m_compteur_reset == 60) {
+            place_entities();
+        }
+        return;
+    }
+
     do_events();
 
     move_pacman();
     int eaten = m_terrain->add_eaten(m_pacman->get_tile());
     if(eaten == 1) {
         // std::cout << "DOT" << std::endl;
+        m_score += 10;
         m_pacman->add_stopped(1);
     }
     else if(eaten == 2) {
         std::cout << "SUPERDOT" << std::endl;
+        m_score += 50;
         m_pacman->set_energy(60*m_settings.fright_time);
         m_pacman->add_stopped(3);
         m_blinky->set_logic_state(Ghost::L_FRIGHT);
@@ -93,20 +113,16 @@ void Logic::do_frame() {
     if( energy_left == 0 ){
         m_frame += 1;
     }
-    else if(energy_left == 1) {
-        // fin du fright
-        m_blinky->set_logic_state(Ghost::L_RECOVER);   
-        m_pinky->set_logic_state(Ghost::L_RECOVER);
-        m_inky->set_logic_state(Ghost::L_RECOVER);
-        m_clyde->set_logic_state(Ghost::L_RECOVER);
+    else if( energy_left == 1 || m_current_ghost_score == 3200) {
+        m_current_ghost_score = 200; // reset
+        m_pacman->set_energy(0);
     }
-    else if(energy_left == 120) {
-        m_blinky->set_state(Ghost::FRIGHT_END);   
-        m_pinky->set_state(Ghost::FRIGHT_END);
-        m_inky->set_state(Ghost::FRIGHT_END);
-        m_clyde->set_state(Ghost::FRIGHT_END);
+    check_collision_ghost(m_blinky);
+    check_collision_ghost(m_pinky);
+    check_collision_ghost(m_inky);
+    check_collision_ghost(m_clyde);
 
-    }
+
     m_pacman->decrease_energy();
 }
 
@@ -134,6 +150,13 @@ void Logic::init_new_level() {
     m_pinky->load_param( m_settings );
     m_inky->load_param( m_settings );
     m_clyde->load_param( m_settings );
+
+    place_entities();
+
+    m_current_ghost_score = 200;
+}
+
+void Logic::place_entities() {
 
     m_pacman->set_direction(Direction::Left);
     m_pacman->set_pos(112,212);
@@ -171,7 +194,6 @@ void Logic::init_new_level() {
     m_clyde->reset_counter_anim();
     m_clyde->set_is_idling(true);
     m_clyde->is_force_reverse_pending(); // pour le virer
-    
 }
 
 void Logic::do_events() {
@@ -294,6 +316,32 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
         this->do_get_out(ghost);
         return;
     }
+    if(ghost->get_state() == Ghost::SCORE) {
+        ghost->inc_counter_anim();
+        if (ghost->get_counter_anim() > 100) {
+            ghost->set_state(Ghost::EATEN);
+            ghost->update_dir_retour();
+        }
+        return;
+    }
+    if(ghost->is_eaten()) {
+        // rentrer en ligne droite au centre
+        std::pair<double,double> delta = ghost->get_dir_retour();
+        ghost->move(delta.first,delta.second);
+        cout << ghost->get_pos() << " = " << int(ghost->get_x()) << " " << int(ghost->get_y()) << endl;
+        int x = int(ghost->get_x());
+        int y = int(ghost->get_y());
+        if( 96 < x && x < 127
+        &&  136 < y && y < 143 ) {
+            cout << "ARRIVE" << endl;
+            ghost->set_pos(112,140);
+            ghost->set_is_eaten(false);
+            ghost->set_state(Ghost::NORMAL);
+            ghost->set_logic_state(Ghost::L_RECOVER);
+            ghost->set_is_starting(true);
+        }
+        return;
+    }
     static bool second_try = false;
 
     double speed;
@@ -313,7 +361,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
         speed = m_settings.g_speed_fright;
     }
     else if(ghost->is_eaten()) {
-        speed = 4; // vite vite retour au centre
+        speed = 1.5; // vite vite retour au centre
     }
     else {
         speed = m_settings.g_speed;
@@ -507,3 +555,35 @@ void Logic::do_get_out(std::shared_ptr<Ghost> ghost) {
     }
 }
 
+void Logic::check_collision_ghost(std::shared_ptr<Ghost> ghost) {
+    if( ghost->is_eaten()) return;
+    int energy_left = m_pacman->is_energized();
+    if(energy_left == 1) {
+        // fin du fright
+        ghost->set_logic_state(Ghost::L_RECOVER);   
+    }
+    else if(energy_left == 120) {
+        ghost->set_state(Ghost::FRIGHT_END);   
+    }
+    if( m_pacman->get_tile() == ghost->get_tile() ) {
+        if(m_pacman->is_energized() && ghost->get_logic_state() == Ghost::L_FRIGHT) {
+            // cout << "MANGER" << endl;
+            // ghost->set_score(m_current_ghost_score);
+            m_score += m_current_ghost_score;
+            m_current_ghost_score *= 2;
+            ghost->set_state(Ghost::SCORE);
+            ghost->set_is_eaten(true);
+            ghost->reset_counter_anim(); // pour compter le nbre de frame
+            // depuis qu'il s'est fait mangerr
+        }
+        else { // perte d'une vie
+            m_pacman->set_is_dead(true);
+            m_compteur_reset = 88+60+20;
+            m_life -= 1;
+        }
+    }
+}
+
+int Logic::get_life() {
+    return m_life;
+}
