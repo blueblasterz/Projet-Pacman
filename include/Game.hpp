@@ -35,7 +35,7 @@ protected:
     std::shared_ptr<Inky> m_inky;
     std::shared_ptr<Clyde> m_clyde;
     std::shared_ptr<Terrain> m_terrain;
-    std::unique_ptr<Logic> m_logic;
+    std::shared_ptr<Logic> m_logic;
     std::unique_ptr<View> m_view;
 
     int score;

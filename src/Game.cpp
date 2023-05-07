@@ -22,7 +22,7 @@ Game::Game() :
     m_clyde(std::make_shared<Clyde>(0,0,m_pacman)),
 
     m_terrain(std::make_shared<Terrain>()),
-    m_logic(std::make_unique<Logic>(
+    m_logic(std::make_shared<Logic>(
         m_pacman,
         m_blinky,
         m_clyde,
@@ -66,7 +66,6 @@ Game::Game() :
 }
 
 Game::~Game() {
-    m_logic.release();
     m_view.release();
 }
 
