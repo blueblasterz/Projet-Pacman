@@ -24,22 +24,19 @@ public:
 
     // utilisé pour l'affichage
     enum State {
-        CHASE,    // chasse pacman
-        SCATTER,  // vise le coin
-        FRIGHT,   // appeuré
+        NORMAL,   // normal
+        FRIGHT,   // appeuré (bleu)
         FRIGHT_END, // appeuré et clignotant
         SCORE,    // ces quelques frame où le fantome disparait et affiche le score gagné
         EATEN,    // quand le fantome a été mangé et doit revenir au centre
-        IDLE,     // bloqué au centre
-        STARTING  // en train de sortir du centre
     };
 
     // utilisé pour la logique
     enum LogicState {
-        LCHASE,
-        LSCATTER,
-        LFRIGHT,
-        RECOVER // état spécial pour récupérer l'état enregistrer
+        L_CHASE,   // chasse
+        L_SCATTER, // scatter
+        L_FRIGHT,  // fuite (random)
+        RECOVER    // état spécial pour récupérer l'état enregistré
     };
 
     virtual void compute_target() =0;
@@ -59,17 +56,24 @@ public:
     void reset_counter_anim();
 
     State get_state();
-    // from_timer doit être vrai si le changement est un changement
-    // du au temps qui passe (ie les changements scatter/chase,
-    // mais pas les animations, et les superGum)
-    void set_state(State state, bool from_timer=false);
+    void set_state(State state);
 
     LogicState get_logic_state();
     void set_logic_state(LogicState state);
 
-    bool force_reverse_pending();
+    bool is_force_reverse_pending();
 
     void load_param(Setting::level &  param);
+
+    // quand is_starting est mit à True, met automatiquement is_idling à false
+    // et vice-versa
+    void set_is_idling(bool b);
+    bool is_idling();
+    void set_is_starting(bool b);
+    bool is_starting();
+
+    void set_is_eaten(bool b);
+    bool is_eaten();
 
 protected:
     // contient la case visée par le fantome actuellement
@@ -105,9 +109,6 @@ protected:
     // (IDLE, STARTING)
     int m_counter_anim;
     
-    // stocke l'état que prend le fantome après être sorti de la cage
-    // peut être soit CHASE, soit SCATTER
-    State m_state_buffer;
 
     // stocke un changement de direction forcé
     // ceci arrive quand un fantome change depuis CHASE ou SCATTER vers FRIGHT
@@ -115,7 +116,10 @@ protected:
     // changer de direction une frame après être sorti
     bool m_force_reverse_dir_pending;
 
-    bool m_state_change_pending;
-
-
+    // est-ce que le fantome est dans la cage en attente ?
+    bool m_is_idling;
+    // est-ce que le fantome a entamé sa sortie de la cage ?
+    bool m_is_starting;
+    // est-ce que le fantome s'est fait MANGER ???????????
+    bool m_is_eaten;
 };

@@ -23,7 +23,20 @@ std::pair<int,int> Direction::tile_in_dir(
         case Direction::Left: return {tile.first-1, tile.second};
         case Direction::Right: return {tile.first+1, tile.second};
     }
+    return {-1,-1};
 }
+
+std::ostream& operator<<(std::ostream& os, const Direction::Direction& dir) {
+    switch(dir) {
+        case Direction::Left: os << "Left"; break;
+        case Direction::Right: os << "Right"; break;
+        case Direction::Up: os << "Up"; break;
+        case Direction::Down: os << "Down"; break;
+    }
+    return os;
+}
+
+
 
 Entity::Entity() : Entity(0.0,0.0) {}
 

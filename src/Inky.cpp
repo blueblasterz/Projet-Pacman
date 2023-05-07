@@ -8,7 +8,7 @@ Inky::Inky(
     double y,
     std::shared_ptr<Pacman> &pacman,
     std::shared_ptr<Blinky> &blinky)
-:   Ghost(x,y,pacman, {35,27}),
+:   Ghost(x,y,pacman, {27,35}),
     m_blinky(blinky) {
 
 }
@@ -28,7 +28,7 @@ void Inky::compute_target() {
     vise 2*( pos_pacman_decal - pos_blinky) 
     */
 
-    if(m_state==Ghost::SCATTER) {
+    if(m_logic_state==Ghost::L_SCATTER) {
         m_target = m_scatter_target;
     }
     else {

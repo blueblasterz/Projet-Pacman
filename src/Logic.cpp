@@ -14,6 +14,15 @@
 #include "Clyde.hpp"
 #include "Terrain.hpp"
 
+using std::cout, std::endl;
+// pour pouvoir utiliser << sur des pair
+template<typename T,typename U>
+std::ostream& operator << ( std::ostream& out, 
+                const std::pair< T, U >& p )
+{
+    out << "(" << p.first << ", " << p.second << ")";
+    return out;
+}
 // distance entre 2 points
 double distance( std::pair<int,int> a, std::pair<int,int> b ) {
     return sqrt( pow(a.first*8-b.first*8,2) 
@@ -85,10 +94,10 @@ void Logic::do_frame() {
     } 
     else if(energy_left == 1) {
         // fin du fright
-        m_blinky->set_state(Ghost::FRIGHT);   
-        m_pinky->set_state(Ghost::FRIGHT);
-        m_inky->set_state(Ghost::FRIGHT);
-        m_clyde->set_state(Ghost::FRIGHT);
+        m_blinky->set_logic_state(Ghost::L_FRIGHT);   
+        m_pinky->set_logic_state(Ghost::L_FRIGHT);
+        m_inky->set_logic_state(Ghost::L_FRIGHT);
+        m_clyde->set_logic_state(Ghost::L_FRIGHT);
     }
     else if(energy_left == 120) {
 
@@ -126,23 +135,36 @@ void Logic::init_new_level() {
 
     m_blinky->set_pos(112,116);
     m_blinky->set_direction(Direction::Left);
-    m_blinky->set_state(Ghost::CHASE);
+    m_blinky->set_logic_state(Ghost::L_SCATTER);
+    m_blinky->set_state(Ghost::NORMAL);
     m_blinky->reset_counter_anim();
+    m_blinky->set_is_idling(false);
+    m_blinky->set_is_starting(false);
+    m_blinky->is_force_reverse_pending(); // pour le virer
 
     m_pinky->set_pos(112,140);
     m_pinky->set_direction(Direction::Left);
-    m_pinky->set_state(Ghost::STARTING);
+    m_pinky->set_logic_state(Ghost::L_SCATTER);
+    m_pinky->set_state(Ghost::NORMAL);
     m_pinky->reset_counter_anim();
+    m_pinky->set_is_starting(true);
+    m_pinky->is_force_reverse_pending(); // pour le virer
     
     m_inky->set_pos(96,140);
     m_inky->set_direction(Direction::Left);
-    m_inky->set_state(Ghost::IDLE);
+    m_inky->set_logic_state(Ghost::L_SCATTER);
+    m_inky->set_state(Ghost::NORMAL);
     m_inky->reset_counter_anim();
+    m_inky->set_is_idling(true);
+    m_inky->is_force_reverse_pending(); // pour le virer
 
     m_clyde->set_pos(128,140);
     m_clyde->set_direction(Direction::Left);
-    m_clyde->set_state(Ghost::IDLE);
+    m_clyde->set_logic_state(Ghost::L_SCATTER);
+    m_clyde->set_state(Ghost::NORMAL);
     m_clyde->reset_counter_anim();
+    m_clyde->set_is_idling(true);
+    m_clyde->is_force_reverse_pending(); // pour le virer
     
 }
 
@@ -258,11 +280,11 @@ void Logic::move_pacman() {
 
 void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
     if(ghost->is_stopped()) return;
-    if(ghost->get_state() == Ghost::IDLE) {
+    if(ghost->is_idling()) {
         this->do_idle_ghost(ghost);
         return;
     }
-    if(ghost->get_state() == Ghost::STARTING) {
+    if(ghost->is_starting()) {
         this->do_get_out(ghost);
         return;
     }
@@ -270,7 +292,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
 
     double speed;
     Direction::Direction dir = ghost->get_direction();
-    Ghost::State state = ghost->get_state();
+    Ghost::LogicState state = ghost->get_logic_state();
     bool cancel_change(false);
     
     double cur_x = ghost->get_x();
@@ -281,14 +303,11 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
     if( m_terrain->is_tunnel(tile) ) {
         speed = m_settings.g_speed_tunnel;
     }
-    else if(state == Ghost::FRIGHT || state == Ghost::FRIGHT_END) {
+    else if(state == Ghost::L_FRIGHT) {
         speed = m_settings.g_speed_fright;
     }
-    else if(state == Ghost::EATEN) {
+    else if(ghost->is_eaten()) {
         speed = 4; // vite vite retour au centre
-    }
-    else if(state == Ghost::SCORE) {
-        speed = 0; // immobile pendant l'affichage du score
     }
     else {
         speed = m_settings.g_speed;
@@ -319,26 +338,25 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
             return;
         }
     }
+    
     if(!ghost->is_locked_direction()
     && int(cur_x)%8 == 4 
     && int(cur_y)%8 == 4 
     && m_terrain->is_intersection(tile) ) {
-        if(state == Ghost::CHASE) {
+        // cout << "en " << tile << endl;
+        if(state != Ghost::L_FRIGHT) {
             ghost->compute_target();
             auto possib = m_terrain->get_possib(ghost);
             std::pair<int,int> target = ghost->get_target();
             double best_dist = 10000;
             Direction::Direction best_dir;
             for(Direction::Direction test_dir : possib) {
-                std::pair<int,int> test_tile = tile;
-                switch(test_dir) {
-                    case Direction::Up: test_tile.second -= 1; break;
-                    case Direction::Left: test_tile.first -= 1; break;
-                    case Direction::Down: test_tile.second += 1; break;
-                    case Direction::Right: test_tile.first += 1; break;
-                } 
+                std::pair<int,int> test_tile = Direction::tile_in_dir(tile, test_dir);
+
                 double test_dist = distance(target,test_tile);
-                // std::cout << m_terrain->is_gate(tile) << "dir : " << test_dir << " = " << test_dist << std::endl;
+                // cout << "  test de " << test_tile 
+                // << "( " << test_dir 
+                // << " dist : " << test_dist << endl;
                 if(test_dist < best_dist) {
                     best_dist = test_dist;
                     best_dir = test_dir;
@@ -354,7 +372,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
             // std::cout << "target : " << target.first << " " << target.second << std::endl;
             ghost->set_locked_direction(true);
         }
-        else if(state == Ghost::FRIGHT || state == Ghost::FRIGHT_END) {
+        else if(state == Ghost::L_FRIGHT) {
             auto possib = m_terrain->get_possib(ghost);
             std::uniform_int_distribution<int> dis(0, 3);
             int rd = dis(m_rng);
@@ -426,7 +444,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
         move_ghost(ghost);
         second_try=false;
     }
-    if(ghost->force_reverse_pending()) {
+    if(ghost->is_force_reverse_pending()) {
         ghost->set_direction( Direction::reverse(ghost->get_direction()) );
     }
 }
@@ -478,7 +496,7 @@ void Logic::do_get_out(std::shared_ptr<Ghost> ghost) {
         if(ghost->get_y() == 116) {
             ghost->set_direction(Direction::Left);
             ghost->reset_counter_anim();
-            ghost->set_state(Ghost::CHASE);
+            ghost->set_is_starting(false);
         }
     }
 }

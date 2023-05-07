@@ -19,11 +19,12 @@ Ghost::Ghost(
     m_fright_speed(0.5),
     m_locked_direction(false),
     m_dot_counter(0),
-    m_state(Ghost::IDLE),
+    m_state(Ghost::NORMAL),
     m_counter_anim(0),
-    m_state_buffer(Ghost::IDLE),
     m_force_reverse_dir_pending(false),
-    m_state_change_pending(false) {
+    m_is_idling(false),
+    m_is_starting(false),
+    m_is_eaten(false) {
 }
 Ghost::Ghost(
     std::pair<int,int> pos,
@@ -80,49 +81,8 @@ void Ghost::reset_counter_anim() {
 Ghost::State Ghost::get_state() {
     return m_state;
 }
-void Ghost::set_state(Ghost::State state, bool from_timer) {
-    if( from_timer ) { // si c'est un changement auto entre scatter et chase
-        if( m_state == Ghost::IDLE || m_state == Ghost::STARTING
-        || m_state == Ghost::EATEN ) {
-            // si on est encore en cage (ou en train d'y revenir), 
-            // on stocke l'état pour plus tard
-            m_state_buffer = state;
-            m_state_change_pending = true;
-            m_force_reverse_dir_pending = !m_force_reverse_dir_pending;
-            return;
-        }
-        // un évt de timer ne peux pas arriver pendant FRIGHT / END_FRIGHT
-        // car le timer est en pause à ce moment
-        // donc on est forcément en CHASE ou SCATTER ici
-        if(m_state != state) {
-            m_state = state; 
-            m_force_reverse_dir_pending = !m_force_reverse_dir_pending;
-        }
-    }
-    else { // l'événement vient du controleur logique
-        // dans le cas où on sort de STARTING,
-        // on prend (s'il existe) le buffer
-        if(m_state == Ghost::STARTING && m_state_change_pending) {
-            // std::cout << "delayed change" << std::endl;
-            m_state = m_state_buffer;
-            return;
-        }
-        // dans le cas où on entre dans FRIGHT,
-        // on enregistre l'état actuel
-        if(state == Ghost::FRIGHT) {
-            m_state_buffer = m_state;
-            m_state = state;
-            return;
-        }
-        // dans le cas où on sort de FRIGHT_END ou de EATEN,
-        // on prend le buffer
-        if(m_state == Ghost::FRIGHT_END || m_state == Ghost::EATEN) {
-            m_state = m_state_buffer;
-            return;
-        }
-        // dans tout les autres cas, on ne fait rien de particulier
-        m_state = state;
-    }
+void Ghost::set_state(Ghost::State state) {
+    m_state = state;
 }
 
 Ghost::LogicState Ghost::get_logic_state() {
@@ -136,17 +96,18 @@ void Ghost::set_logic_state(Ghost::LogicState state) {
         return;
     }
     // on enregistre l'état actuel dans le cas de FRIGHT
-    if(state == LogicState::LFRIGHT) {
+    if(state == LogicState::L_FRIGHT) {
         m_stored_logic_state = m_logic_state;
     }
     // si on part de CHASE ou de SCATTER, on force l'inversion de direction
-    if(m_logic_state != LogicState::LFRIGHT){
+    if(m_logic_state != LogicState::L_FRIGHT
+    && m_logic_state != state){
         m_force_reverse_dir_pending = true;
     }
     m_logic_state = state;
 }
 
-bool Ghost::force_reverse_pending() {
+bool Ghost::is_force_reverse_pending() {
     if(m_force_reverse_dir_pending) {
         m_force_reverse_dir_pending = false;
         return true;
@@ -158,4 +119,30 @@ void Ghost::load_param(Setting::level & param) {
     m_speed = param.g_speed;
     m_tunnel_speed = param.g_speed_tunnel;
     m_fright_speed = param.g_speed_fright;
+}
+
+void Ghost::set_is_idling(bool b) {
+    m_is_idling = b;
+    if(b) {
+        m_is_starting = false;
+    }
+}
+bool Ghost::is_idling() {
+    return m_is_idling;
+}
+void Ghost::set_is_starting(bool b) {
+    m_is_starting = b;
+    if(b) {
+        m_is_idling = false;
+    }
+}
+bool Ghost::is_starting() {
+    return m_is_starting;
+}
+
+void Ghost::set_is_eaten(bool b) {
+    m_is_eaten = b;
+}
+bool Ghost::is_eaten() {
+    return m_is_eaten;
 }

@@ -5,7 +5,7 @@ INCDIR=./include
 
 EXEC=main
 ARGS=-g -std=c++20 -Wall -Wextra
-LDLIBS=-lSDL2 -lSDL2_ttf
+LDLIBS=-lSDL2
 CC=g++
 
 # ----------------------------------------------

@@ -21,7 +21,7 @@ void Blinky::compute_target() {
     Pour Blinky (le rouge), c'est très facile :
     il ne fait que viser Pacman directement.
     */
-    if(m_state==Ghost::SCATTER) {
+    if(m_logic_state==Ghost::L_SCATTER) {
         m_target = m_scatter_target;
     }
     else {

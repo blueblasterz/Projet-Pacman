@@ -31,46 +31,26 @@ Game::Game() {
         m_terrain
     );
     m_view = std::make_shared<View>(
-        m_pacman.get(),
-        m_blinky.get(),
-        m_pinky.get(),
-        m_inky.get(),
-        m_clyde.get(),
-        m_terrain.get()
+        m_pacman,
+        m_blinky,
+        m_pinky,
+        m_inky,
+        m_clyde,
+        m_terrain
     );
     cout << "Fin de l'initialisation" << endl;
 }
 
 Game::~Game() {}
 
-
+#define PACMAN_SPEED 1
 void Game::launch() {
-    m_pacman->set_direction(Direction::Left);
-    m_pacman->set_pos(112,212);
-    m_pacman->set_speed(0.8);
 
-    m_blinky->set_pos(112,116);
-    // m_blinky->set_tile(14,32);
-    m_blinky->set_direction(Direction::Left);
-    m_blinky->set_speed(0.75);
-    m_blinky->set_state(Ghost::CHASE);
-
-    m_pinky->set_pos(112,140);
-    m_pinky->set_direction(Direction::Left);
-    m_pinky->set_speed(0.75);
-    m_pinky->set_state(Ghost::STARTING);
-    
-    m_inky->set_pos(96,140);
-    m_inky->set_direction(Direction::Left);
-    m_inky->set_speed(0.75);
-    m_clyde->set_pos(128,140);
-    m_clyde->set_direction(Direction::Left);
-    m_clyde->set_speed(0.75);
+    // m_blinky->set_is_idling(true);
 
     
     bool quit = false;
     bool pause = true;
-    bool one_frame = false;
     int frame(0); // compte le nombre de frames qui se sont écoulées
     while (!quit)
     {
@@ -90,6 +70,7 @@ void Game::launch() {
                         break;
                     case SDLK_p:
                         pause = !pause;
+                        // m_view->toggle_pause()
                         break;
                     case SDLK_d:
                         cout << "Pacman : " << m_pacman->get_tile() << m_pacman->get_pos() << endl;
@@ -99,7 +80,7 @@ void Game::launch() {
                         if(m_pacman->get_speed() != 0)
                             m_pacman->set_speed(0);
                         else 
-                            m_pacman->set_speed(0.8);
+                            m_pacman->set_speed(PACMAN_SPEED);
                         break;
                     case SDLK_e:
                         cout << "Eaten tiles : " << endl;
@@ -109,10 +90,32 @@ void Game::launch() {
                         cout << "--" << endl;
                         break;
                     case SDLK_c: // lancer clyde
-                        m_clyde->set_state(Ghost::STARTING);
+                        m_clyde->set_is_starting(true);
                         break;
                     case SDLK_i: // lancer inky
-                        m_inky->set_state(Ghost::STARTING);
+                        m_inky->set_is_starting(true);
+                        break;
+                    case SDLK_o: // scatter
+                        if(m_blinky->get_logic_state() == Ghost::L_CHASE) {
+                            m_blinky->set_logic_state(Ghost::L_SCATTER);
+                            m_inky  ->set_logic_state(Ghost::L_SCATTER);
+                            m_pinky ->set_logic_state(Ghost::L_SCATTER);
+                            m_clyde ->set_logic_state(Ghost::L_SCATTER);
+                        }
+                        else if (m_blinky->get_logic_state() == Ghost::L_SCATTER) {
+                            m_blinky->set_logic_state(Ghost::L_CHASE);
+                            m_inky  ->set_logic_state(Ghost::L_CHASE);
+                            m_pinky ->set_logic_state(Ghost::L_CHASE);
+                            m_clyde ->set_logic_state(Ghost::L_CHASE);
+                        }
+                        // cout << m_blinky->get_state() << endl;
+                        // cout << m_inky->get_state() << endl;
+                        // cout << m_pinky->get_state() << endl;
+                        // cout << m_clyde->get_state() << endl;
+                        break;
+                    case SDLK_RETURN:
+                        pause = true;
+                        m_logic->init_new_level();
                         break;
                     default: break;
                 }
@@ -129,25 +132,27 @@ void Game::launch() {
         }
         if (keys[SDL_SCANCODE_LEFT]) {
             // m_pacman->move(-1,0);
-            m_pacman->set_direction(Direction::Left);
+            m_pacman->set_next_dir(Direction::Left);
         }
         if (keys[SDL_SCANCODE_RIGHT]) {
             // m_pacman->move(1,0);
-            m_pacman->set_direction(Direction::Right);
+            m_pacman->set_next_dir(Direction::Right);
         }
         if (keys[SDL_SCANCODE_UP]) {
             // m_pacman->move(0,-1);
-            m_pacman->set_direction(Direction::Up);
+            m_pacman->set_next_dir(Direction::Up);
         }
         if (keys[SDL_SCANCODE_DOWN]) {
             // m_pacman->move(0,1);
-            m_pacman->set_direction(Direction::Down);
+            m_pacman->set_next_dir(Direction::Down);
         }
         
         // FRAME
         if(!pause) {
             m_logic->do_frame();
+            frame ++;
             // cout << m_pacman->get_pos() << endl;
+            // cout << m_pinky->get_target() << endl;
         }
         
 
@@ -161,6 +166,7 @@ void Game::launch() {
             );
         SDL_UpdateWindowSurface(m_view->getWindow());
         // LIMITE A 60 FPS
-        SDL_Delay(16); // utiliser SDL_GetTicks64() pour plus de precisions
+        SDL_Delay(16); 
+        // SDL_Delay(5); 
     }
 }

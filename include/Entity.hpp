@@ -15,8 +15,9 @@ namespace Direction {
     };
     Direction reverse(Direction dir);
     std::pair<int,int> tile_in_dir(std::pair<int,int> tile, Direction dir);
-}
 
+}
+std::ostream& operator<<(std::ostream& os, const Direction::Direction& dir);
 
 class Entity {
 public:
