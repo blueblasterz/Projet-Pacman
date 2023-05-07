@@ -3,6 +3,28 @@
 #include "Pacman.hpp"
 
 
+
+std::ostream& operator<<(std::ostream& os, const Ghost::LogicState& st) {
+    switch(st) {
+        case Ghost::L_CHASE: os << "L_CHASE"; break;
+        case Ghost::L_FRIGHT: os << "L_FRIGHT"; break;
+        case Ghost::L_SCATTER: os << "L_SCATTER"; break;
+        case Ghost::L_RECOVER: os << "L_RECOVER"; break;
+    }
+    return os;
+}
+std::ostream& operator<<(std::ostream& os, const Ghost::State& st) {
+    switch(st) {
+        case Ghost::NORMAL: os << "NORMAL"; break;
+        case Ghost::FRIGHT: os << "FRIGHT"; break;
+        case Ghost::FRIGHT_END: os << "FRIGHT_END"; break;
+        case Ghost::SCORE: os << "SCORE"; break;
+        case Ghost::EATEN: os << "EATEN"; break;
+    }
+    return os;
+}
+
+
 Ghost::Ghost() {
 
 }
@@ -20,11 +42,14 @@ Ghost::Ghost(
     m_locked_direction(false),
     m_dot_counter(0),
     m_state(Ghost::NORMAL),
+    m_logic_state(Ghost::L_SCATTER),
+    m_stored_logic_state(Ghost::L_SCATTER),
     m_counter_anim(0),
     m_force_reverse_dir_pending(false),
     m_is_idling(false),
     m_is_starting(false),
-    m_is_eaten(false) {
+    m_is_eaten(false),
+    m_score(200) {
 }
 Ghost::Ghost(
     std::pair<int,int> pos,
@@ -91,12 +116,11 @@ Ghost::LogicState Ghost::get_logic_state() {
 void Ghost::set_logic_state(Ghost::LogicState state) {
     // RECOVER est utilisé pour retrouver
     // l'état précédent à FRIGHT
-    if(state == LogicState::RECOVER) {
-        m_logic_state = m_stored_logic_state;
-        return;
+    if(state == LogicState::L_RECOVER) {
+        state = m_stored_logic_state;
     }
     // on enregistre l'état actuel dans le cas de FRIGHT
-    if(state == LogicState::L_FRIGHT) {
+    if(state == LogicState::L_FRIGHT && m_logic_state != LogicState::L_FRIGHT) {
         m_stored_logic_state = m_logic_state;
     }
     // si on part de CHASE ou de SCATTER, on force l'inversion de direction
@@ -105,6 +129,13 @@ void Ghost::set_logic_state(Ghost::LogicState state) {
         m_force_reverse_dir_pending = true;
     }
     m_logic_state = state;
+
+    if(m_logic_state == LogicState::L_FRIGHT) {
+        this->set_state(Ghost::FRIGHT);
+    }
+    else {
+        this->set_state(Ghost::NORMAL);
+    }
 }
 
 bool Ghost::is_force_reverse_pending() {
@@ -145,4 +176,11 @@ void Ghost::set_is_eaten(bool b) {
 }
 bool Ghost::is_eaten() {
     return m_is_eaten;
+}
+
+void Ghost::set_score(int score) {
+    m_score = score;
+}
+int Ghost::get_score() {
+    return m_score;
 }

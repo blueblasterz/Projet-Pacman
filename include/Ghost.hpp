@@ -36,7 +36,7 @@ public:
         L_CHASE,   // chasse
         L_SCATTER, // scatter
         L_FRIGHT,  // fuite (random)
-        RECOVER    // état spécial pour récupérer l'état enregistré
+        L_RECOVER    // état spécial pour récupérer l'état enregistré
     };
 
     virtual void compute_target() =0;
@@ -74,6 +74,9 @@ public:
 
     void set_is_eaten(bool b);
     bool is_eaten();
+
+    int get_score();
+    void set_score(int score);
 
 protected:
     // contient la case visée par le fantome actuellement
@@ -122,4 +125,12 @@ protected:
     bool m_is_starting;
     // est-ce que le fantome s'est fait MANGER ???????????
     bool m_is_eaten;
+
+    // la valeur que ce fantome rapporte
+    // c'est pour View :):)
+    int m_score;
 };
+
+std::ostream& operator<<(std::ostream& os, const Ghost::LogicState& st);
+
+std::ostream& operator<<(std::ostream& os, const Ghost::State& st);

@@ -44,6 +44,8 @@ Entity::Entity() : Entity(0.0,0.0) {}
 Entity::Entity(double x, double y) 
 : m_x(x),
   m_y(y),
+  m_speed(0),
+  m_direction(Direction::Left),
   m_frame_stopped(0) {
     m_tile_x = round(m_x);
     m_tile_y = round(m_y);

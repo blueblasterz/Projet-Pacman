@@ -14,36 +14,62 @@ std::ostream& operator << ( std::ostream& out,
 }
 
 
-Game::Game() {
-    m_pacman = std::make_shared<Pacman>();
-    m_pinky = std::make_shared<Pinky>(0,0,m_pacman);
-    m_blinky = std::make_shared<Blinky>(0,0,m_pacman);
-    m_inky = std::make_shared<Inky>(0,0,m_pacman,m_blinky);
-    m_clyde = std::make_shared<Clyde>(0,0,m_pacman);
+Game::Game() :
+    m_pacman(std::make_shared<Pacman>()),
+    m_pinky(std::make_shared<Pinky>(0,0,m_pacman)),
+    m_blinky(std::make_shared<Blinky>(0,0,m_pacman)),
+    m_inky(std::make_shared<Inky>(0,0,m_pacman,m_blinky)),
+    m_clyde(std::make_shared<Clyde>(0,0,m_pacman)),
 
-    m_terrain = std::make_shared<Terrain>();
-    m_logic = std::make_shared<Logic>(
+    m_terrain(std::make_shared<Terrain>()),
+    m_logic(std::make_unique<Logic>(
         m_pacman,
         m_blinky,
         m_clyde,
         m_pinky,
         m_inky,
         m_terrain
-    );
-    m_view = std::make_shared<View>(
+    )),
+    m_view(std::make_unique<View>(
         m_pacman,
         m_blinky,
         m_pinky,
         m_inky,
         m_clyde,
         m_terrain
-    );
+    ))
+    {
+    // m_pacman = std::make_shared<Pacman>();
+    // m_pinky = std::make_shared<Pinky>(0,0,m_pacman);
+    // m_blinky = std::make_shared<Blinky>(0,0,m_pacman);
+    // m_inky =   std::make_shared<Inky>(0,0,m_pacman,m_blinky);
+    // m_clyde = std::make_shared<Clyde>(0,0,m_pacman);
+
+    // m_terrain = std::make_shared<Terrain>();
+    // m_logic = std::make_unique<Logic>(
+    //     m_pacman,
+    //     m_blinky,
+    //     m_clyde,
+    //     m_pinky,
+    //     m_inky,
+    //     m_terrain
+    // );
+    // m_view = std::make_unique<View>(
+    //     m_pacman,
+    //     m_blinky,
+    //     m_pinky,
+    //     m_inky,
+    //     m_clyde,
+    //     m_terrain
+    // );
     cout << "Fin de l'initialisation" << endl;
 }
 
-Game::~Game() {}
+Game::~Game() {
+    m_logic.release();
+    m_view.release();
+}
 
-#define PACMAN_SPEED 1
 void Game::launch() {
 
     // m_blinky->set_is_idling(true);
@@ -80,7 +106,7 @@ void Game::launch() {
                         if(m_pacman->get_speed() != 0)
                             m_pacman->set_speed(0);
                         else 
-                            m_pacman->set_speed(PACMAN_SPEED);
+                            m_pacman->set_speed(Setting::level1.pm_speed);
                         break;
                     case SDLK_e:
                         cout << "Eaten tiles : " << endl;
@@ -151,6 +177,14 @@ void Game::launch() {
         if(!pause) {
             m_logic->do_frame();
             frame ++;
+            if(frame%60 == 0) {
+                cout << "Blinky    : " << m_blinky->get_tile() << endl;
+                cout << "  dir     : " << m_blinky->get_direction() << endl;
+                cout << "  l_state : " << m_blinky->get_logic_state() << endl;
+                cout << "  state   : " << m_blinky->get_state() << endl;
+                cout << endl;
+                cout << "energy_Pacman : " << m_pacman->is_energized() << endl << endl;
+            }
             // cout << m_pacman->get_pos() << endl;
             // cout << m_pinky->get_target() << endl;
         }

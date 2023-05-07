@@ -44,6 +44,7 @@ Logic::Logic(
     m_terrain(terrain),
     m_score(0),
     m_frame(0),
+    m_level(0),
     m_fright(false),
     m_nb_dot_eaten(0),
     m_rng(42)
@@ -76,10 +77,10 @@ void Logic::do_frame() {
         std::cout << "SUPERDOT" << std::endl;
         m_pacman->set_energy(60*m_settings.fright_time);
         m_pacman->add_stopped(3);
-        m_blinky->set_state(Ghost::FRIGHT);
-        m_pinky->set_state(Ghost::FRIGHT);
-        m_inky->set_state(Ghost::FRIGHT);
-        m_clyde->set_state(Ghost::FRIGHT);
+        m_blinky->set_logic_state(Ghost::L_FRIGHT);
+        m_pinky->set_logic_state(Ghost::L_FRIGHT);
+        m_inky->set_logic_state(Ghost::L_FRIGHT);
+        m_clyde->set_logic_state(Ghost::L_FRIGHT);
     }
     
     // les fantomes utilisent la nouvelle position de pacman
@@ -91,17 +92,22 @@ void Logic::do_frame() {
     int energy_left = m_pacman->is_energized();
     if( energy_left == 0 ){
         m_frame += 1;
-    } 
+    }
     else if(energy_left == 1) {
         // fin du fright
-        m_blinky->set_logic_state(Ghost::L_FRIGHT);   
-        m_pinky->set_logic_state(Ghost::L_FRIGHT);
-        m_inky->set_logic_state(Ghost::L_FRIGHT);
-        m_clyde->set_logic_state(Ghost::L_FRIGHT);
+        m_blinky->set_logic_state(Ghost::L_RECOVER);   
+        m_pinky->set_logic_state(Ghost::L_RECOVER);
+        m_inky->set_logic_state(Ghost::L_RECOVER);
+        m_clyde->set_logic_state(Ghost::L_RECOVER);
     }
     else if(energy_left == 120) {
+        m_blinky->set_state(Ghost::FRIGHT_END);   
+        m_pinky->set_state(Ghost::FRIGHT_END);
+        m_inky->set_state(Ghost::FRIGHT_END);
+        m_clyde->set_state(Ghost::FRIGHT_END);
 
     }
+    m_pacman->decrease_energy();
 }
 
 void Logic::init_new_level() {

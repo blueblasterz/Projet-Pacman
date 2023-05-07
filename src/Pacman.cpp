@@ -6,7 +6,8 @@ Pacman::Pacman() : Pacman(104.0,204.0){}
 
 Pacman::Pacman(double x, double y) 
 : Entity(x,y),
-  m_energy_timer(0){
+  m_energy_timer(0),
+  m_next_dir(Direction::Left) {
     this->set_speed(0.8);
 }
 
