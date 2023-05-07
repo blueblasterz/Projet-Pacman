@@ -5,6 +5,16 @@
 
 using std::array, std::cout, std::cin, std::endl;
 
+Direction::Direction Direction::reverse(Direction dir) {
+    switch(dir) {
+        case Direction::Up: return Direction::Down;
+        case Direction::Down: return Direction::Up;
+        case Direction::Right: return Direction::Left;
+        case Direction::Left: return Direction::Right;
+    }
+    return Direction::Left;
+}
+
 
 Entity::Entity() : Entity(0.0,0.0) {}
 
@@ -59,11 +69,11 @@ std::pair<int,int> Entity::get_tile(int ahead) {
         case Direction::Up :
             return {m_tile_x-ahead, m_tile_y-ahead};
         case Direction::Down :
-            return {m_tile_x+ahead, m_tile_y};
-        case Direction::Left :
-            return {m_tile_x, m_tile_y-ahead};
-        case Direction::Right:
             return {m_tile_x, m_tile_y+ahead};
+        case Direction::Left :
+            return {m_tile_x-ahead, m_tile_y};
+        case Direction::Right:
+            return {m_tile_x+ahead, m_tile_y};
         default:
             return {m_tile_x, m_tile_y};
             break;
@@ -89,8 +99,8 @@ void Entity::set_direction(Direction::Direction dir) {
 }
 
 double Entity::dist(double x, double y) const {
-    cout << m_x << " " << m_y << endl;
-    cout << x << " " << y << endl;
+    // cout << m_x << " " << m_y << endl;
+    // cout << x << " " << y << endl;
     return sqrt( pow(floor(m_x/8)*8-floor(x/8)*8,2) 
                + pow(floor(m_y/8)*8-floor(y/8)*8,2) );
 }

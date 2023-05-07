@@ -1,5 +1,5 @@
 #include <memory>
-
+#include "Entity.hpp" // pour les directions
 // forward declaration au lieu d'include
 class Pacman;
 class Ghost;
@@ -21,6 +21,10 @@ public:
     );
 
     void do_frame();
+
+
+    double compute_dx(double speed, Direction::Direction dir);
+    double compute_dy(double speed, Direction::Direction dir);
 
     void move_pacman();
     void move_ghost(std::shared_ptr<Ghost> ghost);

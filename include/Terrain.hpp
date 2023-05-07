@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 #include <memory>
-
+#include <vector>
 
 #include "Entity.hpp" // inclut pour l'énumération de directions
 
@@ -22,8 +22,20 @@ public:
     void print_terrain();
 
     bool is_intersection(std::pair<double,double> pos);
+    bool is_intersection(std::pair<int,int> pos);
 
-    bool is_wall(int x, int y);
+    bool is_wall(int x, int y, bool ignore_gate=false);
+    bool is_wall(std::pair<int,int> pos, bool ignore_gate=false);
+
+    bool is_tunnel(int x, int y);
+    bool is_tunnel(std::pair<int,int> pos);
+
+    bool is_gate(int x, int y);
+    bool is_gate(std::pair<int,int> pos);
+
+    // renvois la liste des directions possibles à partir d'une Tile
+    // pour un fantôme
+    std::vector<Direction::Direction> get_possib(std::shared_ptr<Entity> ghost);
 
     // int action_pacman(std::pair<double,double> pos);
 

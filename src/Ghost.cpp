@@ -15,7 +15,9 @@ Ghost::Ghost(
 ):  Entity(x,y),
     m_scatter_target(scatter_pos),
     m_pacman(pacman),
-    m_scatter(false) {
+    m_scatter(false),
+    m_tunnel_speed(0.4),
+    m_locked_direction(false) {
     
 }
 Ghost::Ghost(
@@ -31,4 +33,30 @@ Ghost::~Ghost() {}
 
 std::pair<int,int> Ghost::get_target() {
     return m_target;
+}
+
+
+double Ghost::get_tunnel_speed() {
+    return m_tunnel_speed;
+}
+void Ghost::set_tunnel_speed(double speed) {
+    if (speed < 0) {
+        m_tunnel_speed = 0;
+    }
+    else if (speed > 1) {
+        m_tunnel_speed = 1;
+    }
+    else {
+        m_tunnel_speed = speed;
+    }
+}
+
+void Ghost::toggle_locked_direction() {
+    m_locked_direction = !m_locked_direction;
+}
+void Ghost::set_locked_direction(bool locked) {
+    m_locked_direction = locked;
+}
+bool Ghost::is_locked_direction() {
+    return m_locked_direction;
 }

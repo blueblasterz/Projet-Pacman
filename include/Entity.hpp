@@ -12,6 +12,7 @@ namespace Direction {
         Up,
         Down
     };
+    Direction reverse(Direction dir);
 }
 
 

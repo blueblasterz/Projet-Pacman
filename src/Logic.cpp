@@ -11,6 +11,11 @@
 #include "Clyde.hpp"
 #include "Terrain.hpp"
 
+// distance entre 2 points
+double distance( std::pair<int,int> a, std::pair<int,int> b ) {
+    return sqrt( pow(a.first*8-b.first*8,2) 
+               + pow(a.second*8-b.second*8,2) );
+}
 
 Logic::Logic(
     std::shared_ptr<Pacman>  &pacman,
@@ -31,10 +36,27 @@ Logic::Logic(
 
 void Logic::do_frame() {
     move_pacman();
-    // move_ghost(m_blinky);
-    // move_ghost(m_clyde);
-    // move_ghost(m_pinky);
-    // move_ghost(m_inky); // inky utilisera la nouvelle position de blinky
+    // les fantomes utilisent la nouvelle position de pacman
+    move_ghost(m_blinky);
+    move_ghost(m_clyde);
+    move_ghost(m_pinky);
+    move_ghost(m_inky); // inky utilisera la nouvelle position de blinky
+}
+
+double Logic::compute_dx(double speed, Direction::Direction dir) {
+    if(dir == Direction::Left)
+        return 0-speed;
+    if(dir == Direction::Right)
+        return speed;
+    return 0;
+}
+
+double Logic::compute_dy(double speed, Direction::Direction dir) { 
+    if(dir == Direction::Up)
+        return 0-speed;
+    if(dir == Direction::Down)
+        return speed;
+    return 0;
 }
 
 void Logic::move_pacman() {
@@ -42,29 +64,14 @@ void Logic::move_pacman() {
     static bool second_try = false;
     double speed = m_pacman->get_speed();
     // std::cout << m_pacman->get_direction() << std::endl;
-    double dx(0);
-    double dy(0);
+    Direction::Direction dir = m_pacman->get_direction();
+    double dx = compute_dx(speed, dir);
+    double dy = compute_dy(speed, dir);
     bool cancel_change(false);
-    switch(m_pacman->get_direction()) {
-        case Direction::Up:
-            dy -= speed;
-            break;
-        case Direction::Down:
-            dy += speed;
-            break;
-        case Direction::Left:
-            dx -= speed;
-            break;
-        case Direction::Right:
-            dx += speed;
-            break;
-        default:
-            std::cerr << "Problème de direction pour pacman" << std::endl;
-    }
+    
     double cur_x = m_pacman->get_x();
     double cur_y = m_pacman->get_y();
     std::pair<int,int> tile = m_pacman->get_tile();
-    Direction::Direction dir = m_pacman->get_direction();
     //cas particulier : tunnel
     if( int(cur_y) == 140 
     && (dir == Direction::Right || dir == Direction::Left)) {
@@ -129,5 +136,113 @@ void Logic::move_pacman() {
 }
 
 void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
+    static bool second_try = false;
 
+    double speed = ghost->get_speed();
+    Direction::Direction dir = ghost->get_direction();
+    bool cancel_change(false);
+    
+    double cur_x = ghost->get_x();
+    double cur_y = ghost->get_y();
+    std::pair<int,int> tile = ghost->get_tile();
+    std::cout << tile.first << " " << tile.second << std::endl;
+
+    if( m_terrain->is_tunnel(tile) ) {
+        speed = ghost->get_tunnel_speed();
+    }
+    double dx = compute_dx(speed, dir);
+    double dy = compute_dy(speed, dir);
+    //cas particulier : tunnel
+    if( int(cur_y) == 140 
+    && (dir == Direction::Right || dir == Direction::Left)) {
+        if(cur_x + dx > 219
+        && dir == Direction::Right) {
+            if(cur_x + dx >= 224) {
+                ghost->set_x(cur_x+dx-224);
+            }
+            else {
+                ghost->move(dx,dy);
+            }
+            return;
+        }
+        if(cur_x + dx < 5
+        && dir == Direction::Left) {
+            if(cur_x + dx < 0) {
+                ghost->set_x(222-cur_x-dx);
+            }
+            else {
+                ghost->move(dx,dy);
+            }
+            return;
+        }
+    }
+    if(!ghost->is_locked_direction()
+    && int(cur_x)%8 == 4 
+    && int(cur_y)%8 == 4 
+    && m_terrain->is_intersection(tile) ) {
+        ghost->compute_target();
+        auto possib = m_terrain->get_possib(ghost);
+        std::pair<int,int> target = ghost->get_target();
+        double best_dist = 10000;
+        Direction::Direction best_dir;
+        for(Direction::Direction test_dir : possib) {
+            std::pair<int,int> test_tile = tile;
+            switch(test_dir) {
+                case Direction::Up: test_tile.second -= 1; break;
+                case Direction::Left: test_tile.first -= 1; break;
+                case Direction::Down: test_tile.second += 1; break;
+                case Direction::Right: test_tile.first += 1; break;
+            } 
+            double test_dist = distance(target,test_tile);
+            std::cout << m_terrain->is_gate(tile) << "dir : " << test_dir << " = " << test_dist << std::endl;
+            if(test_dist < best_dist) {
+                best_dist = test_dist;
+                best_dir = test_dir;
+            }
+        }
+        if(best_dist != 10000) {
+            ghost->set_direction(best_dir);
+            dir = best_dir;
+            dx = compute_dx(speed, dir);
+            dy = compute_dy(speed, dir);
+        }
+        std::cout << "best dir : " << best_dir << " " << best_dist << std::endl;
+        std::cout << "target : " << target.first << " " << target.second << std::endl;
+        ghost->set_locked_direction(true);
+    }
+    else {
+        ghost->set_locked_direction(false);
+    }
+
+    if (dy != 0) { // déplacement vertical
+        if( int(cur_y)%8 == 4 ) {
+            if(( int(cur_x)%8 != 4 )
+            || (dy > 0 && m_terrain->is_wall(tile.first,tile.second+1) )
+            || (dy < 0 && m_terrain->is_wall(tile.first,tile.second-1, true) ))
+            {
+                cancel_change = true;
+            }
+        }
+    }
+    if (dx != 0) { // déplacement horizontal
+        if( int(cur_x)%8 == 4 ) {
+            if(( int(cur_y)%8 != 4 )
+            || (dx > 0 && m_terrain->is_wall(tile.first+1,tile.second) )
+            || (dx < 0 && m_terrain->is_wall(tile.first-1,tile.second) ))
+            {
+                cancel_change = true;
+            }
+        }
+    }
+    if(!cancel_change) {
+        ghost->move(dx,dy);
+    }
+    else if(!second_try) {
+        auto possib = m_terrain->get_possib(ghost);
+        ghost->set_direction( possib.at(0) );
+        // std::cout << "bonk " << possib.at(0) << std::endl;
+        second_try = true;
+        move_ghost(ghost);
+        second_try=false;
+    }
 }

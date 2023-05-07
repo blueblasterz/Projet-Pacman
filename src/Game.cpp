@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+using std::cout, std::cin, std::endl;
+
 // pour pouvoir utiliser << sur des pair
 template<typename T,typename U>
 std::ostream& operator << ( std::ostream& out, 
@@ -29,7 +31,7 @@ Game::Game() {
         m_terrain
     );
     m_view = std::make_shared<View>();
-    std::cout << "Fin de l'initialisation" << std::endl;
+    cout << "Fin de l'initialisation" << endl;
 }
 
 Game::~Game() {}
@@ -40,7 +42,8 @@ void Game::launch() {
     m_pacman->set_pos(112,212);
     m_pacman->set_speed(0.8);
 
-    m_blinky->set_pos(112,116);
+    // m_blinky->set_pos(112,116);
+    m_blinky->set_tile(14,32);
     m_blinky->set_direction(Direction::Left);
     m_blinky->set_speed(0.75);
     m_pinky->set_pos(112,140);
@@ -49,7 +52,7 @@ void Game::launch() {
     m_inky->set_pos(96,140);
     m_inky->set_direction(Direction::Left);
     m_inky->set_speed(0.75);
-    m_clyde->set_pos(112,140);
+    m_clyde->set_pos(128,140);
     m_clyde->set_direction(Direction::Left);
     m_clyde->set_speed(0.75);
 
@@ -71,10 +74,20 @@ void Game::launch() {
                 switch(event.key.keysym.sym) {
                     case SDLK_f:
                         m_logic->do_frame();
-                        std::cout << m_pacman->get_pos() << std::endl;
+                        cout << m_pacman->get_pos() << endl;
                         break;
                     case SDLK_p:
                         pause = !pause;
+                        break;
+                    case SDLK_d:
+                        cout << "Pacman : " << m_pacman->get_tile() << endl;
+                        cout << "Blinky : " << m_blinky->get_tile() << endl;
+                        break;
+                    case SDLK_s:
+                        if(m_pacman->get_speed() != 0)
+                            m_pacman->set_speed(0);
+                        else 
+                            m_pacman->set_speed(0.8);
                         break;
                 }
                 break;
@@ -108,7 +121,7 @@ void Game::launch() {
         // FRAME
         if(!pause) {
             m_logic->do_frame();
-            std::cout << m_pacman->get_pos() << std::endl;
+            // cout << m_pacman->get_pos() << endl;
         }
         
 
