@@ -174,8 +174,6 @@ protected:
     Direction::Direction m_clyde_direction;
 
     int m_frame;
-    int m_score;
-    int m_lives;
 
     // entiers permettant de switcher les animations
     int sprite_pacman_animation; // int pour le type d'animation du pacman

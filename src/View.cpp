@@ -146,8 +146,7 @@ View::View(
     death_animation = 0;
 
     m_frame = 0;
-    m_score = 0;
-    m_lives = 4;
+
 
     // On initialise tous les sprites :
     m_pacman_sprite_idle = {716, 1, 16, 16};
@@ -254,13 +253,7 @@ View::~View(){
     SDL_Quit();
 }
 
-void View::set_score(int score){
-    m_score = score;
-}
 
-void View::set_lives(int lives){
-    m_lives = lives;
-}
 
 SDL_Window* View::getWindow() const{
     return m_window.get();
@@ -315,11 +308,11 @@ void View::draw_score(){
 
 void View::draw_lives(){
 
-    int lives = m_logic->get_life();
     SDL_BlitScaled(plancheSprites, &bg_pointless, win_surf, &black_bg_lives);
 
+
     // On récupère la position du score : 
-    for (int i = 0; i < lives; i++){
+    for (int i = 0; i < m_logic->get_life(); i++){
     
         SDL_BlitScaled(plancheSprites, &m_pacman_sprite_left_1, win_surf, &position_lives);
         position_lives.x += 48;
@@ -364,7 +357,6 @@ void View::draw_win(){
 
     SDL_BlitScaled(plancheSprites, &m_letter_sprite_U, win_surf, &position_message2);
     position_message.x += 24;
-    
 
 }
 
