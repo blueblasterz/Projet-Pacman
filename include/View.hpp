@@ -103,7 +103,7 @@ public:
     Rq : Cela vaut aussi pour les fonctions change_sprite_fright_end(), 
     change_sprite_fright(), change_sprite_eaten() et change_sprite_score().
     */
-    void change_sprite_fright(Ghost* ghost);
+    void change_sprite_fright(Ghost* ghost, SDL_Rect position_scaled);
 
     /*
     Permet de dessiner le nombre de vies restantes du pacman
