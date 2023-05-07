@@ -17,7 +17,8 @@ Ghost::Ghost(
     m_pacman(pacman),
     m_scatter(false),
     m_tunnel_speed(0.4),
-    m_locked_direction(false) {
+    m_locked_direction(false),
+    m_is_caged(true) {
     
 }
 Ghost::Ghost(
@@ -59,4 +60,11 @@ void Ghost::set_locked_direction(bool locked) {
 }
 bool Ghost::is_locked_direction() {
     return m_locked_direction;
+}
+
+void Ghost::set_is_caged(bool caged) {
+    m_is_caged = caged;
+}
+bool Ghost::is_caged() {
+    return m_is_caged;
 }

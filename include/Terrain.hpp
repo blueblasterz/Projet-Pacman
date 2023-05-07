@@ -39,10 +39,22 @@ public:
 
     // int action_pacman(std::pair<double,double> pos);
 
-    std::vector<std::pair<int,int>> get_eaten();
+    // renvois la liste des tiles qui ont été mangées
+    const std::vector<std::pair<int,int>> & get_eaten();
+
+    // ajoute une tile dans la liste des tiles mangées
+    // uniquement si celle-ci correspond à une tile avec un Dot ou un SuperDot
+    // renvois 0 si la case n'était pas un Dot ou un SuperDot
+    // renvois 1 si la case était un Dot
+    // renvois 2 si la case était un SuperDot
+    int add_eaten(std::pair<int,int> pos);
 
 protected:
 
+    // tiles qui ont été "mangées"
+    std::vector<std::pair<int,int>> m_eaten_tiles;
+
+    // l'ensemble des tiles
     std::array<std::array<Tile::Tile,36>,28> m_tiles;
     
     // est-ce qu'une case est une intersection ?

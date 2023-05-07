@@ -36,6 +36,13 @@ Logic::Logic(
 
 void Logic::do_frame() {
     move_pacman();
+    int eaten = m_terrain->add_eaten(m_pacman->get_tile());
+    if(eaten == 1) {
+        std::cout << "DOT" << std::endl;
+    }
+    else if(eaten == 2) {
+        std::cout << "SUPERDOT" << std::endl;
+    }
     // les fantomes utilisent la nouvelle position de pacman
     move_ghost(m_blinky);
     move_ghost(m_clyde);
@@ -145,7 +152,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
     double cur_x = ghost->get_x();
     double cur_y = ghost->get_y();
     std::pair<int,int> tile = ghost->get_tile();
-    std::cout << tile.first << " " << tile.second << std::endl;
+    // std::cout << tile.first << " " << tile.second << std::endl;
 
     if( m_terrain->is_tunnel(tile) ) {
         speed = ghost->get_tunnel_speed();
@@ -194,7 +201,7 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
                 case Direction::Right: test_tile.first += 1; break;
             } 
             double test_dist = distance(target,test_tile);
-            std::cout << m_terrain->is_gate(tile) << "dir : " << test_dir << " = " << test_dist << std::endl;
+            // std::cout << m_terrain->is_gate(tile) << "dir : " << test_dir << " = " << test_dist << std::endl;
             if(test_dist < best_dist) {
                 best_dist = test_dist;
                 best_dir = test_dir;
@@ -206,8 +213,8 @@ void Logic::move_ghost(std::shared_ptr<Ghost> ghost) {
             dx = compute_dx(speed, dir);
             dy = compute_dy(speed, dir);
         }
-        std::cout << "best dir : " << best_dir << " " << best_dist << std::endl;
-        std::cout << "target : " << target.first << " " << target.second << std::endl;
+        // std::cout << "best dir : " << best_dir << " " << best_dist << std::endl;
+        // std::cout << "target : " << target.first << " " << target.second << std::endl;
         ghost->set_locked_direction(true);
     }
     else {

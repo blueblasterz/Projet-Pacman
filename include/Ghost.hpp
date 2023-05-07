@@ -31,6 +31,9 @@ public:
     void set_locked_direction(bool locked);
     bool is_locked_direction();
 
+    void set_is_caged(bool caged);
+    bool is_caged();
+
 protected:
     // contient la case visée par le fantome actuellement
     std::pair<int,int> m_target;
@@ -49,5 +52,9 @@ protected:
 
     // est-ce que la direction du fantome est bloquée ?
     bool m_locked_direction;
+
+    // est-ce que le fantome est bloqué dans la cage ?
+    // autrement dit est-ce qu'il a le droit de passer la porte
+    bool m_is_caged;
 
 };

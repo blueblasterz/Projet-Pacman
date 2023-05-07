@@ -183,8 +183,19 @@ std::vector<Direction::Direction> Terrain::get_possib(
 }
 
 
-std::vector<std::pair<int,int>> get_eaten() {
-    std::vector<std::pair<int,int>> res;
+const std::vector<std::pair<int,int>> & Terrain::get_eaten() {
+    return m_eaten_tiles;
+}
 
-    return res;
+int Terrain::add_eaten(std::pair<int,int> pos) {
+    if(pos.first < 0  || pos.first > 27 
+    || pos.second < 0 || pos.second > 35) {
+        return 0;
+    }
+    Tile::Tile tile = m_tiles.at(pos.first).at(pos.second);
+    if( tile == Tile::Dot || tile == Tile::SuperDot ) {
+        m_eaten_tiles.push_back(pos);
+        m_tiles.at(pos.first).at(pos.second) = Tile::Empty;
+        return (tile == Tile::Dot) ? 1 : 2;
+    }
 }
